@@ -1,0 +1,75 @@
+COPY:
+- Supports multiple destination directories. 
+- Copies the entirety of the origin list, for each item in the destination list
+- <Ctrl+Shift+Enter>
+
+MOVE:
+- Supports no more/less than a single destination directory. 
+- Moves the entirety of the origin list to the path specified in the destination list
+- <Ctrl+Enter>
+
+Clear All: 
+- Clear entire form
+- <Ctrl+L>
+
+Clear Selection:
+- Clear only selected items in a given list
+- <Ctrl+P>
+
+Open Origin(s):
+- Show the file-dialog, insert into origin list (top)
+- <Ctrl+O>
+
+Open Destination(s):
+- Show the file-dialog, insert into destination list (bottom)
+- <Ctrl+K+O>
+
+==========================================================
+
+Settings:
+
+- Show Hidden Files and Folders:
+Show system & hidden files in directory listings.
+
+- Include Files in Tree:
+Include files alongside directories, with a different icon.
+
+- Treeview Horizontal Scroll:
+Enables a bandaid for some broken Tkinter code. Horizontal scrolling is broken for ttk treeview. This setting forces an arbitrary horizontal scroll, regardless of the tree width. Feel free to change that value in the source code if you find it nessecary or feel adventurous. 
+
+- Ask-Overwrite:
+Prompts the user for further action if the program encounters existing files/directories during operation.  
+
+- Rename Duplicates:
+Renames the file until a given path conflic is resolved, by appending an index to the filename. 
+
+===========================================================
+
+Tips & Tricks:
+
+Drag + drop files/directories to CopyTo-MoveTo.exe's shortcut to run the application with those paths as arguments. Currently hardcoded to populate to origin listbox.
+
+Drill through the treeview with Doubleclick, Enter, or ArrowKeys. Directories are lazy loaded, and only read once.
+
+Navigate the listbox on the right with the mouse or arrow keys. Multiselect is supported with the Shift key, or by dragging the mouse. Select all with <Ctrl+A> as expected. Confirm selection in the filedialog with Enter. 
+
+The listboxes in the main window can be populated multiple times, and are only cleared upon a Copy/Move operation, or if the user deliberately clears them using the menu operations.
+
+If you encounter a "System cannot find the file specified" error, try enabling / disabling the "Show Hidden Files & Folders" setting. Blame Windows.
+===========================================================
+
+How does this application work?
+
+Copyto-Moveto offloads all the heavy lifting to the user's command line. Python's OS and shutil modules provide great interfaces, and are most likely more appropriate (and more performant) for the task. Building this application was an excercise, not an attempt to reinvent the wheel. 
+
+Instead, this application makes non-GMO, gluten-free system calls to copy and move (and sometimes a sprinkle of robocopy). The rest is done with Python and Tkinter.
+
+By default, Copyto-Moveto will mow down anything in its way, and assumes the user knows what files and directories are being moved, copied, or more importantly, overwritten. Moreover, it provides no hand-holding of any sort in its default state (configurable under options), and will silently bulldoze over anything that exists where it wants to dump the load. In most cases, this includes hidden files, system files, etc. 
+
+Generally, what will halt the application is an attempt to read or delete a directory that does not exist, in which case the program will complain to the user via a messagebox. This can sometimes be triggered by hidden legacy files that serve as pointers to modern versions of those files or directories.
+
+In the future, different skins will most likely be available as Tkinter/Tcl supports a variety of themes. 
+
+A context menu entry is currently in development, which will allow users to choose source(s) directly from windows explorer with right click (Hopefully accomplished via some sort of ICP or a lockfile. (I'm still pulling my hair out trying to implement this but I'm confident it can be done without creating too high a mountain of ugly code)). After this is implemented, only one instance of Copyto-Moveto will be allowed to run at a time, which is how it already should be. 
+
+See "About" for contact info regarding questions, comments, requests, etc.
