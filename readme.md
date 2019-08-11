@@ -11,7 +11,7 @@ about.txt, help.txt, and the img directory all must exist alongside the main pro
 <hr>
 CopyTo-MoveTo is still very much in beta and various UI tweaks / improvements are still to come. 
 
-Plans are to implement a context menu in Explorer for this application. File dialog or "Add-Items" will also be refactored to be resuable (and expanded upon, most likely with search + filter features), as it was the entire point of writing this program. 
+Plans currently include a context menu in Explorer for this application. Additionally, the file dialog or "Add-Items" will also be refactored to be resuable (and expanded upon, most likely with search + filter features), as it was the entire point of writing this program. 
 
 If you like or use this CopyTo-MoveTo, please considering contributing to the source code, or request a new feature.
 
