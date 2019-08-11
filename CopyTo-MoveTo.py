@@ -7,6 +7,7 @@ from tkinter import(
     Text,
     Message,
     Listbox,
+    Label,
     Scrollbar,
     messagebox,
 )
@@ -25,7 +26,7 @@ from re import findall, sub, split as re_split
 
 from json import loads, dumps
 
-#Popen might slowly replace calls to run
+#Popen might replace calls to run
 from subprocess import run
 
 from sys import argv
@@ -176,7 +177,10 @@ def settings_exclusives(*args):
 
 def flip_slashes(path, direction):
     """
-        A really simple utility that changes path delimiters.
+        A really simple utility that normalizes path delimiters.
+
+        This exists so paths can be handled with forward slashes in Python,
+        then swapped on the fly before being passed to to a shell.
     """
 
     if direction == "forward":
@@ -208,7 +212,7 @@ def get_disks():
 
     disks=findall("[A-Z]:", str(logicaldisks.stdout))
     
-    return [disk+"/" for disk in disks]
+    return [disk + "/" for disk in disks]
 
 
 def list_dir(full_path, force):
@@ -288,7 +292,7 @@ def init_dialog_populate(tree):
             index="end",
             text=disk[0:-1],
             image=disk_icon,
-            values=disk
+            value=disk
         )
 
 
@@ -308,71 +312,60 @@ def dialog_populate(event, tree, list_box):
     """
     error=False
 
-    #this if statement sucks, and doesn't implement a dynamic behavior.
-    #it should refresh that branch of the tree with a new call to
-    #list_dir + populate
-    if not tree.get_children(tree.focus()):
-        tree_item_name_values=tree.item(tree.focus())["values"]
-        tree_item_name_arr=[str(val) for val in tree_item_name_values]
-        tree_item_name=" ".join(tree_item_name_arr)
+    children = tree.get_children(tree.focus())
+    if children:
+        for child in children:
+            tree.delete(child)
 
-        if isdir(tree_item_name):
-            try:
-                if settings_show_hidden_files.get() == 1:
-                    items=list_dir(tree_item_name, force=True)
-                else:
-                    items=list_dir(tree_item_name, force=False)
+    tree_item_name=tree.item(tree.focus())["values"]
+    tree_item_name = " ".join(tree_item_name)
 
-            except Exception as err:
-                messagebox.showerror(
-                "Error.",
-                err
+    if isdir(tree_item_name):
+        try:
+            if settings_show_hidden_files.get() == 1:
+                items=list_dir(tree_item_name, force=True)
+            else:
+                items=list_dir(tree_item_name, force=False)
+                
+        except Exception as err:
+            messagebox.showerror(
+            "Error.",
+            err
+            )
+
+            items=[]
+            error=True
+            tree.master.lift()
+
+        for item in items:
+            full_path=join(tree_item_name, item)
+
+            if isdir(full_path): 
+                tree.insert(
+                    tree.focus(),
+                    index="end",
+                    text=item,
+                    value=full_path,
+                    image=folder_icon
                 )
 
-                items=[]
-                error=True
-                tree.master.lift()
-
-            for item in items:
-                full_path=join(tree_item_name, item)
-
-                if isdir(full_path): 
-                    tree.insert(
-                        tree.focus(),
-                        index="end",
-                        text=item,
-                        values=full_path,
-                        image=folder_icon
-                    )
-
-                elif settings_include_files_in_tree.get() == 1:
-                    tree.insert(
-                        tree.focus(),
-                        index="end",
-                        text=item,
-                        values=full_path,
-                        image=file_icon
-                    )
+            elif settings_include_files_in_tree.get() == 1:
+                tree.insert(
+                    tree.focus(),
+                    index="end",
+                    text=item,
+                    value=full_path,
+                    image=file_icon
+                )
 
     while list_box.size():
         list_box.delete(0)
 
     if not error:
-
-        tree_item_name_values=tree.item(tree.focus())["values"]
-        tree_item_name_arr=[str(val) for val in tree_item_name_values]
-        tree_item_name=" ".join(tree_item_name_arr)
-
         if isdir(tree_item_name):
-            if settings_show_hidden_files.get():
-                items=list_dir(tree_item_name, force=True)
-            else:
-                items=list_dir(tree_item_name, force=False)
-
             for item in items:
                 full_path=join(tree_item_name, item)
                 list_box.insert("end", full_path)
-        
         else:
             list_box.insert("end", tree_item_name)
 
@@ -673,7 +666,7 @@ def show_add_items(cwd, event=None, source=True):
         add_items.title("Add Items")
         add_items.iconbitmap(f"{cwd}/img/main_icon.ico")
 
-        # Tkinter x_scroll is broken for treeview.
+        # Tkinter x_scroll is broken for treeview apparently
         # https://stackoverflow.com/questions/49715456
         # https://stackoverflow.com/questions/14359906
         tree_x_scrollbar=Scrollbar(add_items, orient="horizontal")
@@ -706,34 +699,34 @@ def show_add_items(cwd, event=None, source=True):
             sticky="nsew",
         )
 
-        file_list.grid(
-            row=0,
-            column=2,
-            sticky="nsew"
-        )
-        
-        tree_x_scrollbar.grid(
-            row=1,
-            column=0,
-            sticky="ew",
-        )
-        
         tree_y_scrollbar.grid(
             row=0,
             column=1,
             sticky="ns",
         )
 
-        file_list_x_scrollbar.grid(
-            row=1,
+        file_list.grid(
+            row=0,
             column=2,
-            sticky="ew",
+            sticky="nsew"
         )
         
         file_list_y_scrollbar.grid(
             row=0,
             column=3,
             sticky="ns",
+        )
+
+        tree_x_scrollbar.grid(
+            row=1,
+            column=0,
+            sticky="ew",
+        )
+
+        file_list_x_scrollbar.grid(
+            row=1,
+            column=2,
+            sticky="ew",
         )
         
         #See above
@@ -1020,21 +1013,19 @@ if __name__ == "__main__":
         shutil wasn't used on purpose, and is most likely an all around
         better (and more performant) choice for the task. 
 
+        File paths are built and passed around with the "/" forward slash
+        delimeter (posixpath.join()), unless being passed as shell arguments, 
+        in which case the delimeters are swapped on the fly using flip_slashes()
+
         This entire program will probably end up getting wrapped or 
-        called by a "handler" that aggregates arguments, in order to 
+        called by a context menu handler that aggregates arguments, in order to 
         deal with multiple instances of the program being instantiated.
         This is triggered by default Windows behavior. Ideally, a context 
         menu entry for Copyto-Moveto will be implemented, so an end-user 
         can multiselect items within windows explorer, and "open with"
-        Copto-Moveto.exe (Note, the registry key will not live under the 
-        actual "open with" keys, but under */shell and directory/shell).
-        This idea hasn't been fully formulated quite yet, but the goal
-        is to mimic the behavior of VSCode and other applications that
-        have their own context menu entry. If a user selects a collection
-        of items in windows explorer, and chooses to "Open with code",
-        VScode will act accordingly. I have some learning to do with 
-        regard to Inter-Process Communication.
-
+        CopyTo-MoveTo.exe. The goal is to mimic the behavior of VSCode and 
+        other applications that employ a single instance mode. This will most
+        likely be implemented with a lockfile + IPC.
     """
 
     master=Tk()
@@ -1054,10 +1045,15 @@ if __name__ == "__main__":
         f"+{master_height_offset}"
     )
 
-    master.grid_rowconfigure(0, weight=1)
-    master.grid_rowconfigure(1, weight=0)
-    master.grid_rowconfigure(2, weight=1)
-    master.grid_rowconfigure(3, weight=0)
+    # master.grid_rowconfigure(0, weight=0)    
+    master.grid_rowconfigure(1, weight=1)
+    # master.grid_rowconfigure(2, weight=1)
+    # master.grid_rowconfigure(3, weight=0)
+    master.grid_rowconfigure(4, weight=1)
+    # master.grid_rowconfigure(5, weight=1)
+
+
+
     master.grid_columnconfigure(0, weight=1)
 
     master.title("CopyTo-MoveTo")
@@ -1259,8 +1255,6 @@ if __name__ == "__main__":
     list_box_from=Listbox(
         master,
         selectmode="extended",
-        bg="#000000",
-        fg="#FFFFFF",
         yscrollcommand=y_scrollbar_from.set,
         xscrollcommand=x_scrollbar_from.set
     )
@@ -1268,46 +1262,68 @@ if __name__ == "__main__":
     list_box_to=Listbox(
         master,
         selectmode="extended",
-        bg="#000000",
-        fg="#FFFFFF",
         yscrollcommand=y_scrollbar_to.set,
         xscrollcommand=x_scrollbar_to.set
     )
 
-    y_scrollbar_from.grid(
-        row=0,
-        column=1,
-        sticky="ns"
+    label_to = Label(
+        master,
+        text="Destination(s):"
     )
 
-    y_scrollbar_to.grid(
-        row=2,
+    label_from = Label(
+        master,
+        text="Source(s):"
+    )
+
+    label_from.grid(
+        row=0,
+        column=0,
+        sticky="w",
+        columnspan=2
+    )
+
+    list_box_from.grid(
+        row=1,
+        column=0,
+        sticky="nsew"
+    )
+
+    y_scrollbar_from.grid(
+        row=1,
         column=1,
         sticky="ns"
     )
 
     x_scrollbar_from.grid(
-        row=1,
+        row=2,
         column=0,
         sticky="ew"
     )
 
-    x_scrollbar_to.grid(
+    label_to.grid(
         row=3,
         column=0,
-        sticky="ew"
-    )
-
-    list_box_from.grid(
-        row=0,
-        column=0,
-        sticky="nsew"
+        sticky="w",
+        columnspan=2
     )
 
     list_box_to.grid(
-        row=2,
+        row=4,
         column=0,
         sticky="nsew"
+    )
+
+    y_scrollbar_to.grid(
+        row=4,
+        column=1,
+        sticky="ns"
+    )
+
+    x_scrollbar_to.grid(
+        row=5,
+        column=0,
+        sticky="ew"
     )
 
     x_scrollbar_from.config(command=list_box_from.xview)
