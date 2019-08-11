@@ -1,5 +1,5 @@
 <h1>CopyTo-MoveTo<h1>
-<h2>Featuring an unopinionated File-Dialog</h2>
+
 <p align="center">
     <img src="https://i.imgur.com/wyWh3B4.jpg?2">
 </p>
