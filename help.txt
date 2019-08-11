@@ -62,7 +62,7 @@ How does this application work?
 
 Copyto-Moveto offloads all the heavy lifting to the user's command line. Python's OS and shutil modules provide great interfaces, and are most likely more appropriate (and more performant) for the task. Building this application was an excercise, not an attempt to reinvent the wheel. 
 
-Instead, this application makes non-GMO, gluten-free system calls to copy and move (and sometimes a sprinkle of robocopy). The rest is done with Python and Tkinter.
+Instead, this application makes non-GMO, gluten-free internal calls to copy and move (and sometimes a sprinkle of robocopy). The rest is done with Python and Tkinter.
 
 By default, Copyto-Moveto will mow down anything in its way, and assumes the user knows what files and directories are being moved, copied, or more importantly, overwritten. Moreover, it provides no hand-holding of any sort in its default state (configurable under options), and will silently bulldoze over anything that exists where it wants to dump the load. In most cases, this includes hidden files, system files, etc. 
 
