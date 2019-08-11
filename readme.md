@@ -1,4 +1,4 @@
-<h1>CopyTo-MoveTo</h1>
+<h1>CopyTo-MoveTo:</h1> Featuring an unopinionated File-Dialog
 
 <p align="center">
     <img src="https://i.imgur.com/wyWh3B4.jpg?2">
