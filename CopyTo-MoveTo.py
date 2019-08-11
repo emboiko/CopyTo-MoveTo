@@ -318,6 +318,7 @@ def dialog_populate(event, tree, list_box):
             tree.delete(child)
 
     tree_item_name=tree.item(tree.focus())["values"]
+    tree_item_name = [str(piece) for piece in tree_item_name]
     tree_item_name = " ".join(tree_item_name)
 
     if isdir(tree_item_name):
@@ -639,6 +640,10 @@ def show_add_items(cwd, event=None, source=True):
         treeview and listbox, both with some bindings attatched.
     """
 
+    ###############
+    # Toplevel config:
+    ###############
+
     if file_dialog_showing.get() == 0:
         file_dialog_showing.set(1)
 
@@ -666,6 +671,10 @@ def show_add_items(cwd, event=None, source=True):
         add_items.title("Add Items")
         add_items.iconbitmap(f"{cwd}/img/main_icon.ico")
 
+        ###############
+        # Body
+        ###############
+
         # Tkinter x_scroll is broken for treeview apparently
         # https://stackoverflow.com/questions/49715456
         # https://stackoverflow.com/questions/14359906
@@ -692,6 +701,15 @@ def show_add_items(cwd, event=None, source=True):
             bd=2,
             relief="ridge"
         )
+
+        tree_x_scrollbar.config(command=tree.xview)
+        tree_y_scrollbar.config(command=tree.yview)
+        file_list_x_scrollbar.config(command=file_list.xview)
+        file_list_y_scrollbar.config(command=file_list.yview)
+
+        ###############
+        # Layout
+        ###############
         
         tree.grid(
             row=0,
@@ -728,21 +746,10 @@ def show_add_items(cwd, event=None, source=True):
             column=2,
             sticky="ew",
         )
-        
-        #See above
-        tree_x_scrollbar.config(command=tree.xview)
-        tree_y_scrollbar.config(command=tree.yview)
-        file_list_x_scrollbar.config(command=file_list.xview)
-        file_list_y_scrollbar.config(command=file_list.yview)
 
-        if settings_tree_xscroll.get() == 1:
-            # This is an ugly bandaid.
-            # Minwidth is arbitrary.
-            tree.column("#0", minwidth=1000)
-        
-        init_dialog_populate(tree)
-
-        dialog_selection=[]
+        ###############
+        # Keybinds & misc logic:
+        ###############
 
         tree.bind(
             sequence="<Double-Button-1>",
@@ -794,6 +801,15 @@ def show_add_items(cwd, event=None, source=True):
             "WM_DELETE_WINDOW",
             lambda: toplevel_close(add_items, file_dialog_showing)
         )
+
+        if settings_tree_xscroll.get() == 1:
+            # This is an ugly bandaid.
+            # Minwidth is arbitrary.
+            tree.column("#0", minwidth=1000)
+
+        init_dialog_populate(tree)
+        dialog_selection=[]
+        add_items.focus()
 
 
 def clear_selected(event=None):
@@ -911,7 +927,11 @@ def copy_load(event=None):
 
     clear(event=None)
 
-    [print(f"Skipped {item}") for item in skipped]
+    if skipped:    
+        messagebox.showinfo(
+            title="Skipped",
+            message="\n".join(skipped)
+        )
 
 
 def move_load(event=None):
@@ -1000,7 +1020,11 @@ def move_load(event=None):
 
     list_box_to.delete(0)
 
-    [print(f"Skipped {item}") for item in skipped]
+    if skipped:    
+        messagebox.showinfo(
+            title="Skipped",
+            message="\n".join(skipped)
+        )
 
 
 if __name__ == "__main__":
@@ -1028,6 +1052,10 @@ if __name__ == "__main__":
         likely be implemented with a lockfile + IPC.
     """
 
+    ###############
+    # Master config:
+    ###############
+
     master=Tk()
 
     master_width=600
@@ -1045,15 +1073,8 @@ if __name__ == "__main__":
         f"+{master_height_offset}"
     )
 
-    # master.grid_rowconfigure(0, weight=0)    
     master.grid_rowconfigure(1, weight=1)
-    # master.grid_rowconfigure(2, weight=1)
-    # master.grid_rowconfigure(3, weight=0)
     master.grid_rowconfigure(4, weight=1)
-    # master.grid_rowconfigure(5, weight=1)
-
-
-
     master.grid_columnconfigure(0, weight=1)
 
     master.title("CopyTo-MoveTo")
@@ -1113,7 +1134,7 @@ if __name__ == "__main__":
     )
 
     ###############
-    # Menu:
+    # Menu config:
     ###############
 
     main_menu=Menu(master)
@@ -1123,6 +1144,10 @@ if __name__ == "__main__":
     settings_menu=Menu(main_menu, tearoff=1, tearoffcommand=tear_off)
     main_menu.add_cascade(label="File", menu=file_menu)
     main_menu.add_cascade(label="Settings", menu=settings_menu)
+
+    ###############
+    # File:
+    ###############
 
     file_menu.add_command(
         label="Open Source(s)",
@@ -1164,6 +1189,10 @@ if __name__ == "__main__":
         command=lambda: show_about(cwd)
     )
 
+    ###############
+    # Settings:
+    ###############
+
     settings_menu.add_checkbutton(
         label="Show Hidden Files & Folders",
         variable=settings_show_hidden_files,
@@ -1198,6 +1227,10 @@ if __name__ == "__main__":
         onvalue=True,
         offvalue=False
     )
+
+    ###############
+    # Menu Buttons:
+    ###############
     
     main_menu.add_separator()
 
@@ -1247,6 +1280,9 @@ if __name__ == "__main__":
     # Body
     ###############
 
+    label_to = Label(master, text="Destination(s):")
+    label_from = Label(master, text="Source(s):")
+
     y_scrollbar_from=Scrollbar(master, orient="vertical")
     y_scrollbar_to=Scrollbar(master, orient="vertical")
     x_scrollbar_from=Scrollbar(master, orient="horizontal")
@@ -1266,15 +1302,14 @@ if __name__ == "__main__":
         xscrollcommand=x_scrollbar_to.set
     )
 
-    label_to = Label(
-        master,
-        text="Destination(s):"
-    )
+    x_scrollbar_from.config(command=list_box_from.xview)
+    y_scrollbar_from.config(command=list_box_from.yview)
+    x_scrollbar_to.config(command=list_box_to.xview)
+    y_scrollbar_to.config(command=list_box_to.yview)
 
-    label_from = Label(
-        master,
-        text="Source(s):"
-    )
+    ###############
+    # Layout
+    ###############
 
     label_from.grid(
         row=0,
@@ -1326,10 +1361,9 @@ if __name__ == "__main__":
         sticky="ew"
     )
 
-    x_scrollbar_from.config(command=list_box_from.xview)
-    y_scrollbar_from.config(command=list_box_from.yview)
-    x_scrollbar_to.config(command=list_box_to.xview)
-    y_scrollbar_to.config(command=list_box_to.yview)
+    ###############
+    # Mainloop & misc logic:
+    ###############
 
     insert_args(get_args(), list_box_from)
 
