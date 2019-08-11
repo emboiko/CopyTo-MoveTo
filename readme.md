@@ -16,8 +16,9 @@ CopyTo-MoveTo is still very much in beta and various UI tweaks / improvements ar
 
 If you like or use this CopyTo-MoveTo, please considering contributing to the source code, or request a new feature.
 <hr>
-
-<img src="https://i.imgur.com/MVXhTZD.png">
-<img src="https://i.imgur.com/1X8c48Y.png">
-<img src="https://i.imgur.com/XLXe8Nc.png">
+<p align="center">
+    <img src="https://i.imgur.com/MVXhTZD.png">
+    <img src="https://i.imgur.com/1X8c48Y.png">
+    <img src="https://i.imgur.com/XLXe8Nc.png">
+</p>
 
