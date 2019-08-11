@@ -47,11 +47,11 @@ Renames the file until a given path conflic is resolved, by appending an index t
 
 Tips & Tricks:
 
-Drag + drop files/directories to CopyTo-MoveTo.exe's shortcut to run the application with those paths as arguments. Currently hardcoded to populate to origin listbox.
-
 Drill through the treeview with Doubleclick, Enter, or ArrowKeys. Directories are lazy loaded, and only read once.
 
 Navigate the listbox on the right with the mouse or arrow keys. Multiselect is supported with the Shift key, or by dragging the mouse. Select all with <Ctrl+A> as expected. Confirm selection in the filedialog with Enter. 
+
+Drag + drop files/directories to CopyTo-MoveTo.exe's shortcut to run the application with those paths as arguments. Currently hardcoded to populate to origin listbox.
 
 The listboxes in the main window can be populated multiple times, and are only cleared upon a Copy/Move operation, or if the user deliberately clears them using the menu operations.
 
@@ -70,6 +70,6 @@ Generally, what will halt the application is an attempt to read or delete a dire
 
 In the future, different skins will most likely be available as Tkinter/Tcl supports a variety of themes. 
 
-A context menu entry is currently in development, which will allow users to choose source(s) directly from windows explorer with right click (Hopefully accomplished via some sort of ICP or a lockfile. (I'm still pulling my hair out trying to implement this but I'm confident it can be done without creating too high a mountain of ugly code)). After this is implemented, only one instance of Copyto-Moveto will be allowed to run at a time, which is how it already should be. 
+A context menu entry is currently in development, which will allow users to choose source(s) directly from windows explorer with right click (Hopefully accomplished via some sort of ICP or a lockfile. (I'm still pulling my hair out trying to implement this but I'm confident it can be done without creating too high a mountain of ugly code)). 
 
 See "About" for contact info regarding questions, comments, requests, etc.
