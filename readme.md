@@ -1,6 +1,6 @@
+<h1>CopyTo-MoveTo<h1>
+<h2>Featuring an unopinionated File-Dialog</h2>
 <p align="center">
-    <h2>CopyTo-MoveTo</h2>
-    <h3>Featuring an "unopinionated" File-Dialog<h3>
     <img src="https://i.imgur.com/wyWh3B4.jpg?2">
 </p>
 
