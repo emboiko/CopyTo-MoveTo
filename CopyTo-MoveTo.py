@@ -236,42 +236,27 @@ def list_dir(full_path, force):
             "/a"
         ], shell=True, capture_output=True)
 
-        output=dir_listing.stdout
-        err=dir_listing.stderr
-
-        if not output:
-            return []
-
-        if err:
-            err=err.decode("utf-8")
-            raise Exception(err)
-
-        str_output=output.decode("utf-8")
-        list_output=re_split("\r\n", str_output)
-        
-        return sorted([item for item in list_output if item])
-
     else:
         dir_listing=run([
             "dir",
             full_path,
             "/b"
         ], shell=True, capture_output=True)
+
+    output=dir_listing.stdout
+    err=dir_listing.stderr
+
+    if not output:
+        return []
+
+    if err:
+        err=err.decode("utf-8")
+        raise Exception(err)
+
+    str_output=output.decode("utf-8")
+    list_output=re_split("\r\n", str_output)
     
-        output=dir_listing.stdout
-        err=dir_listing.stderr
-
-        if not output:
-            return []
-
-        if err:
-            err=err.decode("utf-8")
-            raise Exception(err)
-
-        str_output=output.decode("utf-8")
-        list_output=re_split("\r\n", str_output)
-        
-        return sorted([item for item in list_output if item])
+    return sorted([item for item in list_output if item])
 
 
 def init_dialog_populate(tree):
@@ -286,6 +271,7 @@ def init_dialog_populate(tree):
     """
 
     disks=get_disks()
+
     for disk in disks:
         tree.insert(
             "",
@@ -410,30 +396,25 @@ def cleanup(full_path):
     full_path=flip_slashes(full_path, "back")
 
     if isdir(full_path):
-        dir_result=run([
+        result=run([
             "rmdir",
             "/s",
             "/q",
             full_path
         ], shell=True, capture_output=True)
-        
-        stderr=str(dir_result.stderr)
-        
-        if len(stderr) > 3:
-            raise Exception(stderr)
 
     else:
-        file_result=run([
+        result=run([
             "del",
             "/f",
             "/q",
             full_path
         ], shell=True, capture_output=True)
-        
-        stderr=str(file_result.stderr)
-        
-        if len(stderr) > 3:
-            raise Exception(stderr)
+    
+    stderr=str(result.stderr)
+    
+    if len(stderr) > 3:
+        raise Exception(stderr)
 
 
 def name_dupe(future_destination):
@@ -512,10 +493,6 @@ def copy(source, destination):
                 future_destination
             ], shell=True, capture_output=True)
 
-            stderr=str(result.stderr)
-            if len(stderr) > 3:
-                raise Exception(stderr)
-
         else:    
             result=run([
                 "copy",
@@ -524,9 +501,9 @@ def copy(source, destination):
                 destination
             ], shell=True, capture_output=True)
 
-            stderr=str(result.stderr)
-            if len(stderr) > 3:
-                raise Exception(stderr)
+        stderr=str(result.stderr)
+        if len(stderr) > 3:
+            raise Exception(stderr)
 
 
 def show_about(cwd):
