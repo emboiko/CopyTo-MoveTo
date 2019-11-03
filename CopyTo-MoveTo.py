@@ -26,7 +26,6 @@ from re import findall, sub, split as re_split
 
 from json import loads, dumps
 
-#Popen might replace calls to run
 from subprocess import run
 
 from sys import argv
@@ -120,17 +119,6 @@ def master_close(master):
         settings_file.write(settings_json)
 
     master.destroy()
-
-
-# def get_args():
-#     """
-#         Gathers all arguments into an array and returns them if they exist
-#     """
-#     args = None
-#     if len(argv) > 1:
-#         args = argv[1:]
-#         return args
-#     return args
 
 
 def insert_args(list_box):
