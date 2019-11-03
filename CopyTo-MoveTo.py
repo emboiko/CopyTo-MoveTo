@@ -34,18 +34,20 @@ from sys import argv
 from platform import system
 
 
-def get_offset(window_width, window_height):
+def get_offset(tk_window):
     """
         Returns an appropriate offset for a given tkinter toplevel,
         such that it always is created center screen on the primary display.
     """
 
-    width_offset=int(
-        (master.winfo_screenwidth() / 2) - (window_width / 2)
+    width_offset = int(
+        (tk_window.winfo_screenwidth() / 2) - (tk_window.winfo_width() / 2)
     )
-    height_offset=int(
-        (master.winfo_screenheight() / 2) - (window_height / 2)
+
+    height_offset = int(
+        (tk_window.winfo_screenheight() / 2) - (tk_window.winfo_height() / 2)
     )
+
     return (width_offset, height_offset)
 
 
@@ -120,26 +122,26 @@ def master_close(master):
     master.destroy()
 
 
-def get_args():
-    """
-        Gathers all arguments into an array and returns them if they exist
-    """
-    args = None
-    if len(argv) > 1:
-        args = argv[1:]
-        return args
-    return args
+# def get_args():
+#     """
+#         Gathers all arguments into an array and returns them if they exist
+#     """
+#     args = None
+#     if len(argv) > 1:
+#         args = argv[1:]
+#         return args
+#     return args
 
 
-def insert_args(args, list_box):
+def insert_args(list_box):
     """
         Called with what's returned from get_args(), and inserts any 
         existing arguments into the list specified (Currently hardcoded 
         to only populate the origin list).
     """
     
-    if args:
-        for arg in args:
+    if argv[1:]:
+        for arg in argv[1:]:
             list_box.insert("end", arg)
 
 
@@ -1035,20 +1037,13 @@ if __name__ == "__main__":
 
     master=Tk()
 
-    master_width=600
-    master_height=400
+    master.geometry("600x400")
     master.minsize(width=400, height=200)
+    master.update()
 
-    (master_width_offset, master_height_offset)=get_offset(
-        master_width, master_height
-    )
-    
-    master.geometry(
-        f"{master_width}"\
-        f"x{master_height}"\
-        f"+{master_width_offset}"\
-        f"+{master_height_offset}"
-    )
+    (width_offset, height_offset)=get_offset(master)
+    master.geometry(f"+{width_offset}+{height_offset}")
+    master.update()
 
     master.grid_rowconfigure(1, weight=1)
     master.grid_rowconfigure(4, weight=1)
@@ -1342,6 +1337,6 @@ if __name__ == "__main__":
     # Mainloop & misc logic:
     ###############
 
-    insert_args(get_args(), list_box_from)
+    insert_args(list_box_from)
 
     master.mainloop()
