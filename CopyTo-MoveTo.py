@@ -507,19 +507,12 @@ def show_about(cwd):
         
         about=Toplevel()
         about.resizable(0,0)
-        about_width=600
-        about_height=400
+        about.geometry("600x400")
+        about.update()
 
-        (about_width_offset, about_height_offset)=get_offset(
-            about_width, about_height
-        )
-
-        about.geometry(
-            f"{about_width}"\
-            f"x{about_height}"\
-            f"+{about_width_offset-75}"\
-            f"+{about_height_offset+75}"
-        )
+        (width_offset, height_offset)=get_offset(about)
+        about.geometry(f"+{width_offset-75}+{height_offset-75}")
+        about.update()
 
         about.title("About")
         about.iconbitmap(f"{cwd}/img/main_icon.ico")
@@ -552,19 +545,12 @@ def show_help(cwd, event=None):
 
         help_window=Toplevel()
         help_window.resizable(0,0)
-        help_window_width=500
-        help_window_height=300
+        help_window.geometry("500x300")
+        help_window.update()
 
-        (help_width_offset, help_height_offset)=get_offset(
-            help_window_width, help_window_height
-        )
-
-        help_window.geometry(
-            f"{help_window_width}"\
-            f"x{help_window_height}"\
-            f"+{help_width_offset}"\
-            f"+{help_height_offset}"
-        )
+        (width_offset, height_offset)=get_offset(help_window)
+        help_window.geometry(f"+{width_offset+75}+{height_offset-75}")
+        help_window.update()
 
         help_window.rowconfigure(0, weight=1)
         help_window.columnconfigure(0, weight=1)
