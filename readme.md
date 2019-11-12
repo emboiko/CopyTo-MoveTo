@@ -1,11 +1,8 @@
 <h1>CopyTo-MoveTo</h1>
-<p align="center">
-    <img src="https://i.imgur.com/wyWh3B4.jpg?2">
-</p>
 
 <strong>Basic Installation and Usage:</strong>
 
-python CopyTo-MoveTo.py 
+`python CopyTo-MoveTo.py`
 
 <strong>-or-</strong>
 
