@@ -10,7 +10,7 @@ Run CopyTo-MoveTo.exe from within its source directory with a shortcut.
 
 about.txt, help.txt, and the img directory all must exist alongside the main program. A settings.json will also be generated on exit. See help & about more information, keybinds, etc.
 <hr>
-Recently refactored w/ some OOP!
+Refactored w/ some OOP!
 <br><br>
 CopyTo-MoveTo is still very much in beta and various UI tweaks / improvements are still to come. Plans currently include a context menu in Explorer for this application. Additionally, the file dialog or "Add-Items" will also be refactored to be resuable (and expanded upon, most likely with search + filter features), as it was the entire point of writing this program. Calls to internal commands will most likely be tweaked and improved over time.
 
