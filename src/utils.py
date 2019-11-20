@@ -1,4 +1,5 @@
 from os.path import exists, isdir, splitext, split
+from posixpath import join
 from re import findall, sub
 from subprocess import run
 from json import loads

@@ -11,16 +11,14 @@ from tkinter import(
     messagebox,
 )
 from tkinter.ttk import Treeview
-
 from posixpath import join
-from os.path import isdir
+from os.path import exists, isdir, split
 from os import getcwd
 from platform import system
 from sys import argv
 from json import dumps
-from re import split
+from re import split as re_split
 from subprocess import run
-
 from utils import (
     flip_slashes,
     init_settings,
@@ -79,11 +77,11 @@ class CopyToMoveTo:
 
         self.cwd=flip_slashes(getcwd(), "forward")
 
-        self.file_icon=PhotoImage(file=f"{self.cwd}/img/file.gif").subsample(50)
-        self.folder_icon=PhotoImage(file=f"{self.cwd}/img/folder.gif").subsample(15)
-        self.disk_icon=PhotoImage(file=f"{self.cwd}/img/disk.gif").subsample(15)
+        self.file_icon=PhotoImage(file=f"{self.cwd}/src/img/file.gif").subsample(50)
+        self.folder_icon=PhotoImage(file=f"{self.cwd}/src/img/folder.gif").subsample(15)
+        self.disk_icon=PhotoImage(file=f"{self.cwd}/src/img/disk.gif").subsample(15)
 
-        self.master.iconbitmap(f"{self.cwd}/img/main_icon.ico")
+        self.master.iconbitmap(f"{self.cwd}/src/img/main_icon.ico")
 
         self.settings_show_hidden_files=BooleanVar()
         self.settings_include_files_in_tree=BooleanVar()
@@ -122,14 +120,20 @@ class CopyToMoveTo:
             accelerator="Ctrl+O",
             command=lambda: self.show_add_items(source=True)
         )
-        self.master.bind("<Control-o>", lambda: self.show_add_items(source=True))
+        self.master.bind(
+            "<Control-o>",
+            lambda event: self.show_add_items(source=True)
+        )
 
         self.file_menu.add_command(
             label="Open Destination(s)",
             accelerator="Ctrl+K+O",
             command=lambda: self.show_add_items(source=False)
         )
-        self.master.bind("<Control-k>o", lambda: self.show_add_items(source=False))
+        self.master.bind(
+            "<Control-k>o",
+            lambda event: self.show_add_items(source=False)
+        )
 
         self.file_menu.add_separator()
         self.file_menu.add_command(label="Help / Commands", command=self.show_help)
@@ -178,13 +182,13 @@ class CopyToMoveTo:
             accelerator="Ctrl+P",
             command=self.clear_selected
         )
-        self.master.bind("<Control-p>", self.clear_selected)
+        self.master.bind("<Control-p>", lambda event: self.clear_selected())
 
         self.main_menu.add_command(
             label="Clear All",
             command=self.clear_all
         )
-        self.master.bind("<Control-l>", self.clear_all)
+        self.master.bind("<Control-l>", lambda event: self.clear_all())
 
         self.main_menu.add_separator()
 
@@ -192,13 +196,19 @@ class CopyToMoveTo:
             label="COPY",
             command=self.copy_load
         )
-        self.master.bind("<Control-Shift-Return>", self.copy_load)
+        self.master.bind(
+            "<Control-Shift-Return>",
+            lambda event: self.copy_load()
+        )
 
         self.main_menu.add_command(
             label="MOVE",
             command=self.move_load
         )
-        self.master.bind("<Control-Return>", self.move_load)
+        self.master.bind(
+            "<Control-Return>",
+            lambda event: self.move_load()
+        )
 
         # Body:
         self.label_to = Label(self.master, text="Destination(s):")
@@ -290,7 +300,7 @@ class CopyToMoveTo:
 
         settings_json=dumps(settings)
 
-        with open("settings.json", "w") as settings_file:
+        with open("src/settings.json", "w") as settings_file:
             settings_file.write(settings_json)
 
         self.master.destroy()
@@ -457,10 +467,7 @@ class CopyToMoveTo:
                         list_item=dupe
 
                 try:
-                    # shutil_copy2(list_item, destination)
-                    # -or- 
-                    # shutil_copytree(list_item, destination)
-                    self.copy(
+                    copy(
                         flip_slashes(list_item, "back"),
                         flip_slashes(destination, "back")
                     )
@@ -536,7 +543,7 @@ class CopyToMoveTo:
                             )
                     
                     else:
-                        skipped.append(list_box_from.get(0))
+                        skipped.append(self.list_box_from.get(0))
                         self.list_box_from.delete(0)
                         continue
 
@@ -552,8 +559,7 @@ class CopyToMoveTo:
                     list_item=dupe
 
             try:
-                # shutil_move(list_item, destination)
-                self.move(
+                move(
                     flip_slashes(list_item, "back"),
                     flip_slashes(destination, "back")
                 )
@@ -614,7 +620,7 @@ class CopyToMoveTo:
             self.add_items.grid_columnconfigure(2, weight=1)
 
             self.add_items.title("Add Items")
-            self.add_items.iconbitmap(f"{self.cwd}/img/main_icon.ico")
+            self.add_items.iconbitmap(f"{self.cwd}/src/img/main_icon.ico")
 
             ###############
             # Body
@@ -709,7 +715,7 @@ class CopyToMoveTo:
                 image=self.disk_icon,
                 value=disk
             )
-
+        
 
     def dialog_populate(self,*args):
         """
@@ -839,7 +845,7 @@ class CopyToMoveTo:
             raise Exception(err)
 
         str_output=output.decode("utf-8")
-        list_output=split("\r\n", str_output)
+        list_output=re_split("\r\n", str_output)
         
         return sorted([item for item in list_output if item])
 
@@ -881,9 +887,9 @@ class CopyToMoveTo:
             self.about.update()
 
             self.about.title("About")
-            self.about.iconbitmap(f"{self.cwd}/img/main_icon.ico")
+            self.about.iconbitmap(f"{self.cwd}/src/img/main_icon.ico")
 
-            with open("about.txt", "r") as infofile:
+            with open("src/about.txt", "r") as infofile:
                 about_info=infofile.read()
 
             self.about_message=Message(
@@ -923,9 +929,9 @@ class CopyToMoveTo:
             self.help_window.columnconfigure(1, weight=1)
 
             self.help_window.title("Help")
-            self.help_window.iconbitmap(f"{self.cwd}/img/main_icon.ico")
+            self.help_window.iconbitmap(f"{self.cwd}/src/img/main_icon.ico")
 
-            with open("help.txt", "r") as helpfile:
+            with open("src/help.txt", "r") as helpfile:
                 help_info=helpfile.read()
 
             self.message_y_scrollbar=Scrollbar(self.help_window, orient="vertical")
