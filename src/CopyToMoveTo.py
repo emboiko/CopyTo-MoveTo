@@ -77,11 +77,11 @@ class CopyToMoveTo:
 
         self.cwd=flip_slashes(getcwd(), "forward")
 
-        self.file_icon=PhotoImage(file=f"{self.cwd}/src/img/file.gif").subsample(50)
-        self.folder_icon=PhotoImage(file=f"{self.cwd}/src/img/folder.gif").subsample(15)
-        self.disk_icon=PhotoImage(file=f"{self.cwd}/src/img/disk.gif").subsample(15)
+        self.file_icon=PhotoImage(file=f"{self.cwd}/img/file.gif").subsample(50)
+        self.folder_icon=PhotoImage(file=f"{self.cwd}/img/folder.gif").subsample(15)
+        self.disk_icon=PhotoImage(file=f"{self.cwd}/img/disk.gif").subsample(15)
 
-        self.master.iconbitmap(f"{self.cwd}/src/img/main_icon.ico")
+        self.master.iconbitmap(f"{self.cwd}/img/main_icon.ico")
 
         self.settings_show_hidden_files=BooleanVar()
         self.settings_include_files_in_tree=BooleanVar()
@@ -300,7 +300,7 @@ class CopyToMoveTo:
 
         settings_json=dumps(settings)
 
-        with open("src/settings.json", "w") as settings_file:
+        with open("settings.json", "w") as settings_file:
             settings_file.write(settings_json)
 
         self.master.destroy()
@@ -610,7 +610,7 @@ class CopyToMoveTo:
             self.add_items.grid_columnconfigure(2, weight=1)
 
             self.add_items.title("Add Items")
-            self.add_items.iconbitmap(f"{self.cwd}/src/img/main_icon.ico")
+            self.add_items.iconbitmap(f"{self.cwd}/img/main_icon.ico")
 
             # Tkinter x_scroll is broken for treeview
             # https://stackoverflow.com/questions/49715456
@@ -865,7 +865,7 @@ class CopyToMoveTo:
             self.about.update()
 
             self.about.title("About")
-            self.about.iconbitmap(f"{self.cwd}/src/img/main_icon.ico")
+            self.about.iconbitmap(f"{self.cwd}/img/main_icon.ico")
 
             with open("src/about.txt", "r") as infofile:
                 about_info=infofile.read()
@@ -907,7 +907,7 @@ class CopyToMoveTo:
             self.help_window.columnconfigure(1, weight=1)
 
             self.help_window.title("Help")
-            self.help_window.iconbitmap(f"{self.cwd}/src/img/main_icon.ico")
+            self.help_window.iconbitmap(f"{self.cwd}/img/main_icon.ico")
 
             with open("src/help.txt", "r") as helpfile:
                 help_info=helpfile.read()
