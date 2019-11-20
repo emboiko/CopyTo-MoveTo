@@ -1,0 +1,13 @@
+Copyto-Moveto is a GUI utility for making the process of copying and moving files and/or directories more explicit, and is intended to be used alongside Windows Explorer. It is built with Python + Tkinter/TCL, made for Windows platforms, and is dependency free. Support for Linux and Mac may come in the future. 
+
+This program was [primarily] created to work around the limitations of built-in filedialogs included in dotNET. Standard dialogs do not support multi-selection of both files and directories all from a single dialog. This application implements a minimalist "Unified File Dialog" that gives some extra control to the end-user, and allows for slightly more complex operations without being forced to use the command line.
+
+Upon dragging/dropping files and folders in Windows Explorer, the operating system tries to take its best guess at what the user wants to accomplish, and executes that guess. This is not always efficient, however it is often convenient. This application tries to maintain as much of that convenience as possible, and requires the user to make a deliberate choice between a Copy/Move operation. 
+
+The program's default behavior will bulldoze over any existing data without asking for confirmation to overwrite/delete. It assumes the user knows what they want. This is, however, configurable under settings. Enabling Ask-Overwrite will prompt the user for further action if any paths crash into each other. Rename Duplicates & Ask-Overwrite are mutually exlusive settings.
+
+For bugs, errors, or unexpected program behavior (include your error message) contact:
+	
+	Edward Boiko
+	Emboiko@gmail.com
+	https://github.com/emboiko
