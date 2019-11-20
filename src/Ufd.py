@@ -1,4 +1,5 @@
 from tkinter import (
+    Tk,
     Toplevel,
     Listbox,
     Scrollbar,
@@ -34,6 +35,9 @@ class Ufd:
             Add items is a minimalist filedialog comprised of a tkinter
             treeview and listbox, both with some bindings attatched.
         """
+
+        root = Tk()
+        root.withdraw()
 
         if show_hidden:
             self.show_hidden_files = True
