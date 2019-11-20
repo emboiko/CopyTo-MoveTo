@@ -581,12 +581,6 @@ class CopyToMoveTo:
             )
 
 
-
-
-
-
-
-##########################################################################################
     def show_add_items(self, source):
         """
             Displays the Add Items dialog and doesn't allow any additional
@@ -595,10 +589,6 @@ class CopyToMoveTo:
             Add items is a minimalist filedialog comprised of a tkinter
             treeview and listbox, both with some bindings attatched.
         """
-
-        ###############
-        # Toplevel config:
-        ###############
 
         if self.file_dialog_showing.get() == 0:
             self.file_dialog_showing.set(1)
@@ -622,11 +612,7 @@ class CopyToMoveTo:
             self.add_items.title("Add Items")
             self.add_items.iconbitmap(f"{self.cwd}/src/img/main_icon.ico")
 
-            ###############
-            # Body
-            ###############
-
-            # Tkinter x_scroll is broken for treeview apparently
+            # Tkinter x_scroll is broken for treeview
             # https://stackoverflow.com/questions/49715456
             # https://stackoverflow.com/questions/14359906
             self.tree_x_scrollbar=Scrollbar(self.add_items, orient="horizontal")
@@ -657,10 +643,6 @@ class CopyToMoveTo:
             self.tree_y_scrollbar.config(command=self.tree.yview)
             self.file_list_x_scrollbar.config(command=self.file_list.xview)
             self.file_list_y_scrollbar.config(command=self.file_list.yview)
-
-            ###############
-            # Layout
-            ###############
             
             self.tree.grid(row=0, column=0, sticky="nsew")
             self.tree_y_scrollbar.grid(row=0, column=1, sticky="ns")
@@ -668,10 +650,6 @@ class CopyToMoveTo:
             self.file_list_y_scrollbar.grid(row=0, column=3, sticky="ns")
             self.tree_x_scrollbar.grid(row=1, column=0, sticky="ew")
             self.file_list_x_scrollbar.grid(row=1, column=2, sticky="ew")
-
-            ###############
-            # Keybinds & misc logic:
-            ###############
 
             self.tree.bind("<Double-Button-1>", self.dialog_populate)
             self.tree.bind("<Return>", self.dialog_populate)
