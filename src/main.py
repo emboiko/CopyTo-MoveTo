@@ -1,6 +1,7 @@
 from tkinter import Tk
 from CopyToMoveTo import CopyToMoveTo
 
+
 def main():
     root = Tk()
     gui = CopyToMoveTo(root)
