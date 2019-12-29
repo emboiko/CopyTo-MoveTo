@@ -10,8 +10,7 @@ from tkinter import(
     messagebox,
 )
 from posixpath import join
-from os.path import exists, split
-from os import getcwd
+from os.path import exists, split, dirname
 from platform import system
 from sys import argv
 from json import dumps
@@ -75,8 +74,7 @@ class CopyToMoveTo:
         self.master.geometry(f"+{width_offset}+{height_offset}")
         self.master.update()
 
-        self.cwd=flip_slashes(getcwd(), "forward")
-        self.master.iconbitmap(f"{self.cwd}/img/main_icon.ico")
+        self.master.iconbitmap(f"{dirname(__file__)}/img/main_icon.ico")
 
         self.settings_show_hidden_files=BooleanVar()
         self.settings_include_files_in_tree=BooleanVar()
@@ -285,7 +283,7 @@ class CopyToMoveTo:
 
         settings_json=dumps(settings)
 
-        with open("settings.json", "w") as settings_file:
+        with open(f"{dirname(__file__)}/settings.json", "w") as settings_file:
             settings_file.write(settings_json)
 
         self.master.destroy()
@@ -521,9 +519,9 @@ class CopyToMoveTo:
             self.about.update()
 
             self.about.title("About")
-            self.about.iconbitmap(f"{self.cwd}/img/main_icon.ico")
+            self.about.iconbitmap(f"{dirname(__file__)}/img/main_icon.ico")
 
-            with open("about.txt", "r") as infofile:
+            with open(f"{dirname(__file__)}/about.txt", "r") as infofile:
                 about_info=infofile.read()
 
             self.about_message=Message(
@@ -563,9 +561,9 @@ class CopyToMoveTo:
             self.help_window.columnconfigure(1, weight=1)
 
             self.help_window.title("Help")
-            self.help_window.iconbitmap(f"{self.cwd}/img/main_icon.ico")
+            self.help_window.iconbitmap(f"{dirname(__file__)}/img/main_icon.ico")
 
-            with open("help.txt", "r") as helpfile:
+            with open(f"{dirname(__file__)}/help.txt", "r") as helpfile:
                 help_info=helpfile.read()
 
             self.message_y_scrollbar=Scrollbar(self.help_window, orient="vertical")

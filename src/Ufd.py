@@ -7,8 +7,7 @@ from tkinter import (
     messagebox
 )
 from tkinter.ttk import Treeview
-from os import getcwd
-from os.path import isdir
+from os.path import isdir, dirname
 from posixpath import join
 from re import split as re_split
 from subprocess import run
@@ -54,11 +53,10 @@ class Ufd:
         else:
             self.tree_xscroll = False
 
-        self.cwd=flip_slashes(getcwd(), "forward")
 
-        self.file_icon=PhotoImage(file=f"{self.cwd}/img/file.gif").subsample(50)
-        self.folder_icon=PhotoImage(file=f"{self.cwd}/img/folder.gif").subsample(15)
-        self.disk_icon=PhotoImage(file=f"{self.cwd}/img/disk.gif").subsample(15)
+        self.file_icon=PhotoImage(file=f"{dirname(__file__)}/img/file.gif").subsample(50)
+        self.folder_icon=PhotoImage(file=f"{dirname(__file__)}/img/folder.gif").subsample(15)
+        self.disk_icon=PhotoImage(file=f"{dirname(__file__)}/img/disk.gif").subsample(15)
 
 
     def __call__(self):
@@ -74,7 +72,7 @@ class Ufd:
         self.dialog.geometry(f"+{width_offset}+{height_offset}")
 
         self.dialog.title("Universal File Dialog")
-        self.dialog.iconbitmap(f"{self.cwd}/img/main_icon.ico")
+        self.dialog.iconbitmap(f"{dirname(__file__)}/img/main_icon.ico")
 
         # Tkinter x_scroll is broken for treeview
         # https://stackoverflow.com/questions/49715456
