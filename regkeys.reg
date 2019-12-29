@@ -1,0 +1,13 @@
+Windows Registry Editor Version 5.00
+
+[HKEY_CLASSES_ROOT\*\shell\CopyTo-MoveTo\command]
+@="C:\\Programming\\Python\\Projects\\CopyTo-MoveTo\\dist\\CopyTo-MoveTo\\CopyTo-MoveTo.exe \"%1\""
+
+[HKEY_CLASSES_ROOT\Directory\shell\CopyTo-MoveTo\command]
+@="C:\\Programming\\Python\\Projects\\CopyTo-MoveTo\\dist\\CopyTo-MoveTo\\CopyTo-MoveTo.exe \"%1\""
+
+; [HKEY_CLASSES_ROOT\*\shell\CopyTo-MoveTo\command]
+; @="C:\\Path\\To\\CopyTo-MoveTo.exe \"%1\""
+
+; [HKEY_CLASSES_ROOT\*\shell\CopyTo-MoveTo\command]
+; @="C:\\Path\\To\\CopyTo-MoveTo.exe \"%1\""
