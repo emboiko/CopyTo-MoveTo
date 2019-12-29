@@ -136,6 +136,11 @@ class Ufd:
         return self.dialog_selection
 
 
+    def __str__(self):
+        return "Universal File Dialog"\
+        f" @ {hex(id(self))}"
+
+
     def init_dialog_populate(self):
         """
             Called each time show_dialog() is called, to initialize the dialog.

@@ -247,19 +247,10 @@ class CopyToMoveTo:
         self.y_scrollbar_to.grid(row=4, column=1, sticky="ns")
         self.x_scrollbar_to.grid(row=5, column=0, sticky="ew")
 
-        self.parse_args()
 
-
-    def parse_args(self):
-        """
-            Called with what's returned from get_args(), and inserts any 
-            existing arguments into the list specified (Currently hardcoded 
-            to only populate the origin list).
-        """
-        
-        if argv[1:]:
-            for arg in argv[1:]:
-                self.list_box_from.insert("end", arg)
+    def __str__(self):
+        return "Main GUI for CopyTo-MoveTo"\
+        f" @ {hex(id(self))}"
 
 
     def settings_exclusives(self, *args):
