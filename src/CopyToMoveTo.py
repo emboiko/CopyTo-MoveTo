@@ -83,6 +83,7 @@ class CopyToMoveTo:
         self.settings_ask_overwrite.trace("w", self.settings_exclusives)
         self.settings_rename_dupes=BooleanVar()
         self.settings_rename_dupes.trace("w", self.settings_exclusives)
+        self.settings_multiselect=BooleanVar()
 
         self.settings=init_settings()
 
@@ -92,6 +93,7 @@ class CopyToMoveTo:
             self.settings_tree_xscroll.set(self.settings["tree_xscroll"])
             self.settings_ask_overwrite.set(self.settings["ask_overwrite"])
             self.settings_rename_dupes.set(self.settings["rename_dupes"])
+            self.settings_multiselect.set(self.settings["multiselect"])
 
         self.file_dialog_showing=BooleanVar()
         self.help_showing=BooleanVar()
@@ -168,6 +170,13 @@ class CopyToMoveTo:
             offvalue=False
         )
 
+        self.settings_menu.add_checkbutton(
+            label="Multiselect",
+            variable=self.settings_multiselect,
+            onvalue=True,
+            offvalue=False
+        )
+        
         self.main_menu.add_separator()
 
         self.main_menu.add_command(
@@ -278,7 +287,8 @@ class CopyToMoveTo:
             "include_files_in_tree" : self.settings_include_files_in_tree.get(),
             "tree_xscroll" : self.settings_tree_xscroll.get(),
             "ask_overwrite" : self.settings_ask_overwrite.get(),
-            "rename_dupes" : self.settings_rename_dupes.get()
+            "rename_dupes" : self.settings_rename_dupes.get(),
+            "multiselect" : self.settings_multiselect.get()
         }
 
         settings_json=dumps(settings)
@@ -589,24 +599,14 @@ class CopyToMoveTo:
 
 
     def show_add_items(self, source=True):
-        args = []
 
-        if self.settings_show_hidden_files.get() == 1:
-            args.append(1)
-        else:
-            args.append(0)
-        
-        if self.settings_include_files_in_tree.get() == 1:
-            args.append(1)
-        else:
-            args.append(0)
+        ufd = Ufd(
+            show_hidden_files=self.settings_show_hidden_files.get(),
+            include_files=self.settings_include_files_in_tree.get(),
+            tree_xscroll=self.settings_tree_xscroll.get(),
+            multiselect=self.settings_multiselect.get()
+        )
 
-        if self.settings_tree_xscroll.get() == 1:
-            args.append(1)
-        else:
-            args.append(0)
-
-        ufd = Ufd(*args)
         dialog_result = ufd()
         
         for result in dialog_result:

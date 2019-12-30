@@ -21,11 +21,13 @@ class Ufd:
         Unopinionated, minimalist, reusable, slightly configurable,
         general-purpose file-dialog.
     """
+    
     def __init__(
         self,
-        show_hidden=False,
+        show_hidden_files=False,
         include_files=False,
-        tree_xscroll=False
+        tree_xscroll=False,
+        multiselect=True,
     ):
         """
             Displays the Add Items dialog and doesn't allow any additional
@@ -38,7 +40,7 @@ class Ufd:
         root = Tk()
         root.withdraw()
 
-        if show_hidden:
+        if show_hidden_files:
             self.show_hidden_files = True
         else:
             self.show_hidden_files = False
@@ -53,6 +55,10 @@ class Ufd:
         else:
             self.tree_xscroll = False
 
+        if multiselect:
+            self.multiselect = True
+        else:
+            self.multiselect = False
 
         self.file_icon=PhotoImage(file=f"{dirname(__file__)}/img/file.gif").subsample(50)
         self.folder_icon=PhotoImage(file=f"{dirname(__file__)}/img/folder.gif").subsample(15)
@@ -63,6 +69,7 @@ class Ufd:
         """
             Display dialog & return selection
         """
+
         self.dialog=Toplevel()
         self.dialog.grab_set()
         self.dialog.geometry("500x300")
@@ -70,6 +77,7 @@ class Ufd:
         self.dialog.update()
         (width_offset, height_offset)=get_offset(self.dialog)
         self.dialog.geometry(f"+{width_offset}+{height_offset}")
+        self.dialog.update()
 
         self.dialog.title("Universal File Dialog")
         self.dialog.iconbitmap(f"{dirname(__file__)}/img/main_icon.ico")
@@ -94,12 +102,16 @@ class Ufd:
             self.dialog,
             xscrollcommand=self.file_list_x_scrollbar.set,
             yscrollcommand=self.file_list_y_scrollbar.set,
-            selectmode="extended",
             width=34,
             highlightthickness=0,
             bd=2,
             relief="ridge"
         )
+
+        if self.multiselect:
+            self.file_list.config(selectmode="extended")
+        else:
+            self.file_list.config(selectmode="browse")
 
         self.tree_x_scrollbar.config(command=self.tree.xview)
         self.tree_y_scrollbar.config(command=self.tree.yview)
@@ -136,6 +148,14 @@ class Ufd:
 
     def __str__(self):
         return "Universal File Dialog"\
+        f" @ {hex(id(self))}"
+
+
+    def __repr__(self):
+        return f"Ufd(show_hidden_files={self.show_hidden_files},"\
+        f" include_files={self.include_files},"\
+        f" tree_xscroll={self.tree_xscroll},"\
+        f" multiselect={self.multiselect})"\
         f" @ {hex(id(self))}"
 
 
@@ -228,7 +248,7 @@ class Ufd:
             for child in children:
                 self.tree.delete(child)
 
-        tree_item_name=self.tree.item(self.tree.focus())["values"]
+        tree_item_name = self.tree.item(self.tree.focus())["values"]
         tree_item_name = [str(piece) for piece in tree_item_name]
         tree_item_name = " ".join(tree_item_name)
 
@@ -240,10 +260,7 @@ class Ufd:
                     items=self.list_dir(tree_item_name, force=False)
                     
             except Exception as err:
-                messagebox.showerror(
-                "Error.",
-                err
-                )
+                messagebox.showerror("Error.", err)
 
                 items=[]
                 error=True
