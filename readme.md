@@ -1,5 +1,5 @@
 # CopyTo-MoveTo
-***
+
 **Basic Installation and Usage:**
 `python CopyTo-MoveTo.py`
 **-or-**
