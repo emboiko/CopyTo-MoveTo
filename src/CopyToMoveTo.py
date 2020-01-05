@@ -27,7 +27,7 @@ from utils import (
     get_offset
 )
 
-from Ufd import Ufd
+from Ufd.src.Ufd import Ufd
 
 
 class CopyToMoveTo:
@@ -38,21 +38,12 @@ class CopyToMoveTo:
         along with code cleanup / thorough documentation.
 
         shutil wasn't used on purpose, and is most likely an all around
-        better (and more performant) choice for the task. 
+        better (and more performant) choice for the task. This may change in
+        the future.
 
         File paths are built and passed around with the "/" forward slash
         delimeter (posixpath.join()), unless being passed as shell arguments, 
         in which case the delimeters are swapped on the fly using flip_slashes()
-
-        This entire program will probably end up getting wrapped or 
-        called by a context menu handler that aggregates arguments, in order to 
-        deal with multiple instances of the program being instantiated.
-        This is triggered by default Windows behavior. Ideally, a context 
-        menu entry for Copyto-Moveto will be implemented, so an end-user 
-        can multiselect items within windows explorer, and "open with"
-        CopyTo-MoveTo.exe. The goal is to mimic the behavior of VSCode and 
-        other applications that employ a single instance mode. This will most
-        likely be implemented with a lockfile + IPC.
     """
 
     def __init__(self, root):
@@ -74,7 +65,7 @@ class CopyToMoveTo:
         self.master.geometry(f"+{width_offset}+{height_offset}")
         self.master.update()
 
-        self.master.iconbitmap(f"{dirname(__file__)}/img/main_icon.ico")
+        self.master.iconbitmap(f"{dirname(__file__)}/main_icon.ico")
 
         self.settings_show_hidden_files=BooleanVar()
         self.settings_include_files_in_tree=BooleanVar()
@@ -84,6 +75,8 @@ class CopyToMoveTo:
         self.settings_rename_dupes=BooleanVar()
         self.settings_rename_dupes.trace("w", self.settings_exclusives)
         self.settings_multiselect=BooleanVar()
+        self.settings_select_dirs=BooleanVar()
+        self.settings_select_files=BooleanVar()
 
         self.settings=init_settings()
 
@@ -94,6 +87,8 @@ class CopyToMoveTo:
             self.settings_ask_overwrite.set(self.settings["ask_overwrite"])
             self.settings_rename_dupes.set(self.settings["rename_dupes"])
             self.settings_multiselect.set(self.settings["multiselect"])
+            self.settings_select_dirs.set(self.settings["select_dirs"])
+            self.settings_select_files.set(self.settings["select_files"])
 
         self.file_dialog_showing=BooleanVar()
         self.help_showing=BooleanVar()
@@ -173,6 +168,20 @@ class CopyToMoveTo:
         self.settings_menu.add_checkbutton(
             label="Multiselect",
             variable=self.settings_multiselect,
+            onvalue=True,
+            offvalue=False
+        )
+
+        self.settings_menu.add_checkbutton(
+            label="Select Folders",
+            variable=self.settings_select_dirs,
+            onvalue=True,
+            offvalue=False
+        )
+
+        self.settings_menu.add_checkbutton(
+            label="Select Files",
+            variable=self.settings_select_files,
             onvalue=True,
             offvalue=False
         )
@@ -279,7 +288,8 @@ class CopyToMoveTo:
 
     def master_close(self):
         """
-            Similar to utils.toplevel_close(), but writes settings to the disk as json.
+            Similar to utils.toplevel_close().
+            writes settings to the disk as json.
         """
         
         settings={
@@ -288,7 +298,9 @@ class CopyToMoveTo:
             "tree_xscroll" : self.settings_tree_xscroll.get(),
             "ask_overwrite" : self.settings_ask_overwrite.get(),
             "rename_dupes" : self.settings_rename_dupes.get(),
-            "multiselect" : self.settings_multiselect.get()
+            "multiselect" : self.settings_multiselect.get(),
+            "select_dirs" : self.settings_select_dirs.get(),
+            "select_files" : self.settings_select_files.get(),
         }
 
         settings_json=dumps(settings)
@@ -297,6 +309,7 @@ class CopyToMoveTo:
             settings_file.write(settings_json)
 
         self.master.destroy()
+        raise SystemExit
 
 
     def clear_selected(self):
@@ -604,7 +617,9 @@ class CopyToMoveTo:
             show_hidden_files=self.settings_show_hidden_files.get(),
             include_files=self.settings_include_files_in_tree.get(),
             tree_xscroll=self.settings_tree_xscroll.get(),
-            multiselect=self.settings_multiselect.get()
+            multiselect=self.settings_multiselect.get(),
+            select_dirs=self.settings_select_dirs.get(),
+            select_files=self.settings_select_files.get(),
         )
 
         dialog_result = ufd()
