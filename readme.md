@@ -3,7 +3,7 @@
 **Basic Installation and Usage:**
 `python CopyTo-MoveTo.py`
 **-or-**
-Run CopyTo-MoveTo.exe from within its source directory using a shortcut.
+Run `CopyTo-MoveTo.exe` from within its source directory using a shortcut.
 
 Edit + execute `regkeys.reg` with a proper path/to/CopyTo-MoveTo.exe and add it to a context menu! Multiselect an arbitrary number of files and/or directories in Windows Explorer, and gather them in CopyTo-MoveTo
 
@@ -23,5 +23,5 @@ CopyTo-MoveTo is still very much in beta and various UI tweaks / improvements ar
 If you like or use CopyTo-MoveTo, please considering contributing to the source code, or request a new feature.
 ***
 ![](https://i.imgur.com/MVXhTZD.png)
-![](https://i.imgur.com/1X8c48Y.png)
-![](https://i.imgur.com/XLXe8Nc.png)
+
+![](https://i.imgur.com/W6G068f.png)
