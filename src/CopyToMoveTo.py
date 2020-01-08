@@ -614,6 +614,7 @@ class CopyToMoveTo:
     def show_add_items(self, source=True):
 
         ufd = Ufd(
+            title="Add Items",
             show_hidden_files=self.settings_show_hidden_files.get(),
             include_files=self.settings_include_files_in_tree.get(),
             tree_xscroll=self.settings_tree_xscroll.get(),
