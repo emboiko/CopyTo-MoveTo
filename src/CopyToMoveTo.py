@@ -542,7 +542,7 @@ class CopyToMoveTo:
             self.about.update()
 
             self.about.title("About")
-            self.about.iconbitmap(f"{dirname(__file__)}/img/main_icon.ico")
+            self.about.iconbitmap(f"{dirname(__file__)}/main_icon.ico")
 
             with open(f"{dirname(__file__)}/about.txt", "r") as infofile:
                 about_info=infofile.read()
@@ -584,7 +584,7 @@ class CopyToMoveTo:
             self.help_window.columnconfigure(1, weight=1)
 
             self.help_window.title("Help")
-            self.help_window.iconbitmap(f"{dirname(__file__)}/img/main_icon.ico")
+            self.help_window.iconbitmap(f"{dirname(__file__)}/main_icon.ico")
 
             with open(f"{dirname(__file__)}/help.txt", "r") as helpfile:
                 help_info=helpfile.read()
