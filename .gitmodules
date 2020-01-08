@@ -1,0 +1,3 @@
+[submodule "src/Ufd"]
+	path = src/Ufd
+	url = https://github.com/emboiko/Ufd.git
