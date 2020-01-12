@@ -3,5 +3,5 @@ Windows Registry Editor Version 5.00
 [HKEY_CLASSES_ROOT\*\shell\CopyTo-MoveTo\command]
 @="C:\\Path\\To\\CopyTo-MoveTo.exe \"%1\""
 
-[HKEY_CLASSES_ROOT\*\shell\CopyTo-MoveTo\command]
+[HKEY_CLASSES_ROOT\directory\shell\CopyTo-MoveTo\command]
 @="C:\\Path\\To\\CopyTo-MoveTo.exe \"%1\""
