@@ -1,7 +1,8 @@
 from os.path import exists, isdir, splitext, split
 from posixpath import join
-from re import findall, sub
 from subprocess import run
+from platform import system
+from re import findall, sub
 from json import loads
 
 
@@ -148,37 +149,36 @@ def cleanup(full_path):
         raise Exception(stderr)
 
 
-def name_dupe(future_destination):
+def name_dupe(path):
     """
-        Renames the file or directory (by reference) until it doesn't exist
+        Renames the file or directory until it doesn't exist
         in the destination with that name anymore, by appending
         the filename with an index wrapped in parenthesis.
+        (Windows platforms)
+        file.txt => file (1).txt => file (2).txt
     """
 
-    if isdir(future_destination):
-        (root, filename)=split(future_destination)
-        new_title=filename
+    if system() != "Windows":
+        raise OSError("For use with Windows filesystems.")
 
-        filecount=0
-        while exists(future_destination):
-            filecount += 1
-            new_title=filename + " (" + str(filecount) + ")"
-            future_destination=join(root, new_title)
-        
-        return new_title
+    path_ = path
+    (root, filename) = split(path_)
 
+    if isdir(path_):
+        title=filename
+        ext = None
     else:
-        (root, filename)=split(future_destination)
         (title, ext)=splitext(filename)
-        new_title=title
 
-        filecount=0
-        while exists(future_destination):
-            filecount += 1
-            new_title=title + " (" + str(filecount) + ")"
-            future_destination=join(root, new_title + ext)
-        
-        return new_title + ext
+    filecount=0
+    while exists(path_):
+        filecount += 1
+        new_title=title + " (" + str(filecount) + ")"
+        if ext:
+            new_title = new_title + ext
+        path_ = join(root, new_title)
+    
+    return path_
 
 
 def get_offset(tk_window):
