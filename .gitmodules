@@ -1,3 +1,6 @@
 [submodule "src/Ufd"]
 	path = src/Ufd
 	url = https://github.com/emboiko/Ufd.git
+[submodule "src/Socket_Singleton"]
+	path = src/Socket_Singleton
+	url = https://github.com/emboiko/Socket_Singleton.git
