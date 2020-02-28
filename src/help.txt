@@ -1,3 +1,6 @@
+Shortcuts:
+----------
+
 COPY:
 - Supports multiple destination directories. 
 - Copies the entirety of the origin list, for each item in the destination list
@@ -24,24 +27,23 @@ Open Destination(s):
 - Show the file-dialog, insert into destination list (bottom)
 - <Ctrl+K+O>
 
-==========================================================
-
 Settings:
+---------
 
 - Show Hidden Files and Folders:
 Show system & hidden files in directory listings.
 
 - Include Files in Tree:
-Include files alongside directories, with a different icon.
+Include files alongside directories, with a unique icon.
 
 - Treeview Horizontal Scroll:
-Enables a bandaid for some broken Tkinter code. Horizontal scrolling is broken for ttk treeview. This setting forces an arbitrary horizontal scroll, regardless of the tree width. Feel free to change that value in the source code if you find it nessecary or feel adventurous. 
+Enables a bandaid for some broken Tkinter code. Horizontal scrolling is broken for ttk treeview. This setting forces an arbitrary horizontal scroll, regardless of the tree width. Feel free to poke around in the source code if you feel adventurous.
 
-- Ask-Overwrite:
-Prompts the user for further action if the program encounters existing files/directories during operation.  
+- Ask Overwrite:
+Prompts the user for further action if the program encounters existing files/directories during operation. (Mutually exclusive with Rename Duplicates)
 
 - Rename Duplicates:
-Renames the file until a given path conflic is resolved, by appending an index to the filename. 
+Renames the file until a given path conflic is resolved, by appending an index to the filename. (Mutually exclusive with Ask Overwrite)
 
 - Multiselect:
 Enable / Disable multiselect in the dialog's list-selection area. 
@@ -54,11 +56,10 @@ Enable / Disable file entries in the dialog's list-selection area.
 
 *** If neither "Select Folders" or "Select Files" is enabled, the file dialog will be, for the most part, useless. By default, the application will allow multiselection of files and directories. 
 
-===========================================================
-
 Tips & Tricks:
+--------------
 
-To enable a context menu entry in Windows Explorer, edit regkeys.reg with a proper path to the application. This makes using CopyTo-MoveTo alongside windows explorer much more streamlined.
+To enable a context menu entry or entries in Windows Explorer, edit regkeys.reg with a proper path to the application. This makes using CopyTo-MoveTo alongside windows explorer much more streamlined.
 
 Drill through the treeview with Doubleclick, Enter, or ArrowKeys. Directories are lazy loaded, and only read once.
 
@@ -67,18 +68,3 @@ Navigate the listbox on the right with the mouse or arrow keys. Multiselect is s
 Drag + drop files/directories to CopyTo-MoveTo.exe's shortcut to run the application with those paths as arguments. Currently hardcoded to populate to origin listbox.
 
 The listboxes in the main window can be populated multiple times, and are only cleared upon a Copy/Move operation, or if the user deliberately clears them using the menu operations.
-
-If you encounter a "System cannot find the file specified" error, check the "Show Hidden Files & Folders" setting. Blame Windows.
-===========================================================
-
-How does this application work?
-
-Copyto-Moveto offloads all the heavy lifting to the user's command line. Python's OS and shutil modules provide great interfaces, and are most likely more appropriate (and more performant) for the task.
-
-Instead, this application makes non-GMO, gluten-free internal calls to copy and move (and sometimes a sprinkle of robocopy). The rest is done with Python and Tkinter.
-
-By default, Copyto-Moveto will mow down anything in its way, and assumes the user knows what files and directories are being moved, copied, or more importantly, overwritten. Moreover, it provides no hand-holding of any sort in its default state (configurable under options), and will silently bulldoze over anything that exists where it wants to dump the load. In most cases, this includes hidden files, system files, etc. 
-
-Generally, what will halt the application is an attempt to read or delete a directory that does not exist, in which case the program will complain to the user via a messagebox. This can sometimes be triggered by hidden legacy files that serve as links to modern versions of those files or directories.
-
-See "About" for contact info regarding questions, comments, requests, etc.

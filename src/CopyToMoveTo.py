@@ -3,52 +3,34 @@ from tkinter import(
     Menu,
     Label,
     Listbox,
-    Toplevel,
     Scrollbar,
-    Message,
+    Toplevel,
     Text,
     messagebox,
 )
-from posixpath import join
-from os.path import exists, split, dirname
+from posixpath import join, split, splitext, exists, isfile, isdir
+from os.path import dirname
 from platform import system
-from sys import argv
-from json import dumps
-from subprocess import run
-
-from utils import (
-    flip_slashes,
-    init_settings,
-    toplevel_close,
-    copy,
-    move,
-    cleanup,
-    name_dupe,
-    get_offset
-)
+from json import dumps, loads
+from os import remove
+from shutil import copy2, move, rmtree, copytree
 
 from Ufd.src.Ufd import Ufd
 
 
 class CopyToMoveTo:
     """
-        Still in beta, use at your own risk.
-
-        Various tweaks and additions are still to come for the UI,
-        along with code cleanup / thorough documentation.
-
-        shutil wasn't used on purpose, and is most likely an all around
-        better (and more performant) choice for the task. This may change in
-        the future.
-
-        File paths are built and passed around with the "/" forward slash
-        delimeter (posixpath.join()), unless being passed as shell arguments, 
-        in which case the delimeters are swapped on the fly using flip_slashes()
+        Minimalist file manager intended to be used independently
+        or alongside Windows Explorer
     """
 
     def __init__(self, root):
+        """
+            Setup window geometry, init settings, define widgets + layout
+        """
         self.master = root
         self.master.title("CopyTo-MoveTo")
+        self.master.iconbitmap(f"{dirname(__file__)}/main_icon.ico")
 
         if system() != "Windows":
             self.master.withdraw()
@@ -56,45 +38,55 @@ class CopyToMoveTo:
                 "Incompatible platform",
                 "CopyTo-MoveTo currently supports Windows platforms only."
             )
-            quit()
+            raise SystemExit
 
-        self.master.geometry("600x400")
-        self.master.minsize(width=400, height=200)
-        self.master.update()
-        (width_offset, height_offset)=get_offset(self.master)
-        self.master.geometry(f"+{width_offset}+{height_offset}")
-        self.master.update()
-
-        self.master.iconbitmap(f"{dirname(__file__)}/main_icon.ico")
-
-        self.settings_show_hidden_files=BooleanVar()
-        self.settings_include_files_in_tree=BooleanVar()
+        #Settings:
+        self.settings_show_hidden=BooleanVar()
+        self.settings_include_files=BooleanVar(value=True)
         self.settings_tree_xscroll=BooleanVar()
         self.settings_ask_overwrite=BooleanVar()
         self.settings_ask_overwrite.trace("w", self.settings_exclusives)
-        self.settings_rename_dupes=BooleanVar()
+        self.settings_rename_dupes=BooleanVar(value=True)
         self.settings_rename_dupes.trace("w", self.settings_exclusives)
-        self.settings_multiselect=BooleanVar()
-        self.settings_select_dirs=BooleanVar()
-        self.settings_select_files=BooleanVar()
+        self.settings_show_skipped=BooleanVar()
+        self.settings_multiselect=BooleanVar(value=True)
+        self.settings_select_dirs=BooleanVar(value=True)
+        self.settings_select_files=BooleanVar(value=True)
+        self.settings_geometry = None
 
-        self.settings=init_settings()
+        self.settings=self.init_settings()
 
         if self.settings:
-            self.settings_show_hidden_files.set(self.settings["show_hidden_files"])
-            self.settings_include_files_in_tree.set(self.settings["include_files_in_tree"])
+            self.settings_geometry = self.settings["geometry"]
+            self.settings_show_hidden.set(self.settings["show_hidden"])
+            self.settings_include_files.set(self.settings["include_files"])
             self.settings_tree_xscroll.set(self.settings["tree_xscroll"])
             self.settings_ask_overwrite.set(self.settings["ask_overwrite"])
             self.settings_rename_dupes.set(self.settings["rename_dupes"])
+            self.settings_show_skipped.set(self.settings["show_skipped"])
             self.settings_multiselect.set(self.settings["multiselect"])
             self.settings_select_dirs.set(self.settings["select_dirs"])
             self.settings_select_files.set(self.settings["select_files"])
 
-        self.file_dialog_showing=BooleanVar()
+        self.dialog_showing=BooleanVar()
         self.help_showing=BooleanVar()
         self.about_showing=BooleanVar()
 
         self.master.protocol("WM_DELETE_WINDOW", self.master_close)
+
+        #Geometry:
+        self.master.minsize(width=400, height=200)
+
+        if self.settings_geometry:
+            self.master.geometry(self.settings_geometry)
+            self.master.update()
+        else:
+            self.master.geometry("600x400")
+            self.master.update()
+            (width_offset, height_offset)=Ufd.get_offset(self.master)
+            self.master.geometry(f"+{width_offset}+{height_offset}")
+            self.master.update()
+
 
         # Menu:
         self.main_menu=Menu(self.master)
@@ -129,17 +121,17 @@ class CopyToMoveTo:
         self.file_menu.add_command(label="Help / Commands", command=self.show_help)
         self.file_menu.add_command(label="About", command=self.show_about)
 
-        #Settings:
+        #Settings menu:
         self.settings_menu.add_checkbutton(
             label="Show Hidden Files & Folders",
-            variable=self.settings_show_hidden_files,
+            variable=self.settings_show_hidden,
             onvalue=True,
             offvalue=False
         )
 
         self.settings_menu.add_checkbutton(
             label="Include Files in Tree",
-            variable=self.settings_include_files_in_tree,
+            variable=self.settings_include_files,
             onvalue=True,
             offvalue=False
         )
@@ -151,8 +143,10 @@ class CopyToMoveTo:
             offvalue=False
         )
 
+        self.settings_menu.add_separator()
+
         self.settings_menu.add_checkbutton(
-            label="Ask-Overwrite",
+            label="Ask Overwrite",
             variable=self.settings_ask_overwrite,
             onvalue=True,
             offvalue=False
@@ -164,6 +158,15 @@ class CopyToMoveTo:
             onvalue=True,
             offvalue=False
         )
+
+        self.settings_menu.add_checkbutton(
+            label="Skipped Items Message",
+            variable=self.settings_show_skipped,
+            onvalue=True,
+            offvalue=False
+        )
+
+        self.settings_menu.add_separator()
 
         self.settings_menu.add_checkbutton(
             label="Multiselect",
@@ -188,6 +191,7 @@ class CopyToMoveTo:
         
         self.main_menu.add_separator()
 
+        #Menu commands:
         self.main_menu.add_command(
             label="Clear Selected",
             accelerator="Ctrl+P",
@@ -265,8 +269,23 @@ class CopyToMoveTo:
 
 
     def __str__(self):
-        return "Main GUI for CopyTo-MoveTo"\
-        f" @ {hex(id(self))}"
+        return f"CopyTo-MoveTo @ {hex(id(self))}"
+
+
+    #Settings:
+    def init_settings(self):
+        """
+            Called on startup, loads, parses, and returns json settings.
+        """
+
+        if exists(f"{dirname(__file__)}/settings.json"):
+            with open(f"{dirname(__file__)}/settings.json", "r") as settings_file:
+                settings_json=settings_file.read()
+
+            settings=loads(settings_json)
+            return settings
+        else:
+            return None
 
 
     def settings_exclusives(self, *args):
@@ -293,11 +312,13 @@ class CopyToMoveTo:
         """
         
         settings={
-            "show_hidden_files" : self.settings_show_hidden_files.get(),
-            "include_files_in_tree" : self.settings_include_files_in_tree.get(),
+            "geometry" : self.master.geometry(),
+            "show_hidden" : self.settings_show_hidden.get(),
+            "include_files" : self.settings_include_files.get(),
             "tree_xscroll" : self.settings_tree_xscroll.get(),
             "ask_overwrite" : self.settings_ask_overwrite.get(),
             "rename_dupes" : self.settings_rename_dupes.get(),
+            "show_skipped" : self.settings_show_skipped.get(),
             "multiselect" : self.settings_multiselect.get(),
             "select_dirs" : self.settings_select_dirs.get(),
             "select_files" : self.settings_select_files.get(),
@@ -311,7 +332,19 @@ class CopyToMoveTo:
         self.master.destroy()
         raise SystemExit
 
+    
+    @staticmethod
+    def toplevel_close(dialog, boolean):
+        """
+            This callback flips the value for a given toplevel_showing boolean
+            to false, before disposing of the toplevel.
+        """
 
+        boolean.set(0)
+        dialog.destroy()
+
+
+    #Menu commands:
     def clear_selected(self):
         """
             Removes selected (highlighted) item(s) from a 
@@ -340,106 +373,87 @@ class CopyToMoveTo:
             self.list_box_to.delete(0)
 
 
+    #Copy & Move:
     def copy_load(self):
         """
             Copies each item in the origin list to each path in the destination list.
 
             The behavior of this function is subject to the state of global booleans 
-            responsible for program settings. Ask-Overwrite and Rename Dupes will alter
-            the way the program handles existing data standing in its way. By default, 
-            all data is overwritten.
+            responsible for program settings. Ask Overwrite and Rename Dupes will alter
+            the way the program handles existing data standing in its way. By default,
+            duplicates are renamed with an index. A messagebox will complain to the user
+            if shutil raises a PermissionError.
         """
 
-        skipped=[]
+        skipped = []
 
         while self.list_box_to.size():
-            destination=self.list_box_to.get(0)
-            
-            for i in range(self.list_box_from.size()):
-                list_item=self.list_box_from.get(i)
-                (_, filename)=split(list_item)
-                future_destination=join(destination, filename)
+            destination = self.list_box_to.get(0)
+
+            while self.list_box_from.size():
+                list_item = self.list_box_from.get(0)
+                (_, filename) = split(list_item)
+                future_destination = join(destination, filename)
 
                 if exists(future_destination):
-
-                    if (self.settings_ask_overwrite.get() == 0) \
-                    and (self.settings_rename_dupes.get() == 0):
+                    if not self.settings_ask_overwrite.get() \
+                    and not self.settings_rename_dupes.get():
                         try:
-                            cleanup(future_destination)
-                        except Exception as err:
-                            messagebox.showerror(
-                                "Error",
-                                err
-                            )
-
-                    elif self.settings_ask_overwrite.get() == 1:
-                        behavior_overwrite=messagebox.askyesno(
-                            title="Path Conflict",
-                            message=f"Overwrite {future_destination}?\n" \
-                            f"YES - Overwrite\n NO - Skip"
-                        )
-
-                        if behavior_overwrite:
-                            try:
-                                cleanup(future_destination)
-                            except Exception as err:
-                                messagebox.showerror(
-                                    "Error",
-                                    err
-                                )
-                    
-                        else:
-                            skipped.append(
-                                f"{self.list_box_from.get(0)}"\
-                                f" => " \
-                                f"{destination}"
-                            )
-                            self.list_box_from.delete(0)
+                            self.delete(future_destination)
+                        except PermissionError:
+                            self.permission_error(skipped)
                             continue
 
-                    elif self.settings_rename_dupes.get() == 1:
-                        dupe=name_dupe(future_destination)
-                            
-                        run([
-                            "move",
-                            flip_slashes(list_item, "back"),
-                            flip_slashes(dupe, "back")
-                        ], shell=True)
+                    if self.settings_ask_overwrite.get():
+                        if self.ask_overwrite(future_destination):
+                            try:
+                                self.delete(future_destination)
+                            except PermissionError:
+                                self.permission_error(skipped)
+                                continue
 
-                        list_item=dupe
+                        else:
+                            skipped.append(self.list_box_from.get(0))
+                            self.list_box_from.delete(0)
+                            continue
+                    
+                    if self.settings_rename_dupes.get():
+                        future_destination = self.name_dupe(future_destination)
 
                 try:
-                    copy(
-                        flip_slashes(list_item, "back"),
-                        flip_slashes(destination, "back")
-                    )
-                except Exception as err:
-                    messagebox.showerror(
-                        "Error | Cancelled.",
-                        err
-                    )
-                    return
+                    if isfile(list_item):
+                        copy2(list_item, future_destination)
+                    else:
+                        copytree(list_item, future_destination)
+                except PermissionError:
+                    self.permission_error(skipped)
+                    continue
+
+                self.list_box_from.delete(0)
 
             self.list_box_to.delete(0)
 
-        self.clear_all()
-
-        if skipped:    
-            messagebox.showinfo(
-                title="Skipped",
-                message="\n".join(skipped)
-            )
+        if self.settings_show_skipped.get():
+            if skipped:    
+                messagebox.showinfo(
+                    title="Skipped",
+                    message="\n".join(skipped)
+                )
 
 
     def move_load(self):
         """
             Moves each item in the origin list to the path in the destination list.
+            Supports no more than one destination directory.
 
             The behavior of this function is subject to the state of global booleans 
-            responsible for program settings. Ask-Overwrite and Rename Dupes will alter
-            the way the program handles existing data standing in its way. By default, 
-            all data is overwritten. Supports only a single destination directory.
+            responsible for program settings. Ask Overwrite and Rename Dupes will alter
+            the way the program handles existing data standing in its way. By default,
+            duplicates are renamed with an index. A messagebox will complain to the user
+            if shutil raises a PermissionError.
         """
+
+        skipped = []
 
         if self.list_box_to.size() > 1:
             messagebox.showwarning(
@@ -448,81 +462,117 @@ class CopyToMoveTo:
             )
             return
 
-        destination=self.list_box_to.get(0)
-        skipped=[]
+        destination = self.list_box_to.get(0)
         
         while self.list_box_from.size():  
-            list_item=self.list_box_from.get(0)
-            (_, filename)=split(list_item)
-            future_destination=join(destination, filename)
+            list_item = self.list_box_from.get(0)
+            (_, filename) = split(list_item)
+            future_destination = join(destination, filename)
 
             if exists(future_destination):
-
-                if (self.settings_ask_overwrite.get() == 0) \
-                and (self.settings_rename_dupes.get() == 0):
+                if not self.settings_ask_overwrite.get() \
+                and not self.settings_rename_dupes.get():
                     try:
-                        cleanup(future_destination)
-                    except Exception as err:
-                        messagebox.showerror(
-                            "Error",
-                            err
-                        )
+                        self.delete(future_destination)
+                    except PermissionError:
+                        self.permission_error(skipped)
+                        continue
 
-                elif self.settings_ask_overwrite.get() == 1:
-                    behavior_overwrite=messagebox.askyesno(
-                        title="Path Conflict",
-                        message=f"Overwrite {future_destination}?\n" \
-                        f"YES - Overwrite\n NO - Skip"
-                    )
-
-                    if behavior_overwrite:
+                if self.settings_ask_overwrite.get():
+                    if self.ask_overwrite(future_destination):
                         try:
-                            cleanup(future_destination)
-                        except Exception as err:
-                            messagebox.showerror(
-                                "Error",
-                                err
-                            )
-                    
+                            self.delete(future_destination)
+                        except PermissionError:
+                            self.permission_error(skipped)
+                            continue
+
                     else:
                         skipped.append(self.list_box_from.get(0))
                         self.list_box_from.delete(0)
                         continue
 
-                elif self.settings_rename_dupes.get() == 1:
-                    dupe=name_dupe(future_destination)
-                        
-                    run([
-                        "move",
-                        flip_slashes(list_item, "back"),
-                        flip_slashes(dupe, "back")
-                    ], shell=True)
-
-                    list_item=dupe
+                if self.settings_rename_dupes.get():
+                    destination = self.name_dupe(future_destination)
 
             try:
-                move(
-                    flip_slashes(list_item, "back"),
-                    flip_slashes(destination, "back")
-                )
-            except Exception as err:
-                messagebox.showerror(
-                    "Error | Cancelled.",
-                    err
-                )
-                return
+                move(list_item, destination)
+            except PermissionError:
+                self.permission_error(skipped)
+                continue
 
             self.list_box_from.delete(0)
 
         self.list_box_to.delete(0)
 
-        if skipped:    
-            messagebox.showinfo(
-                title="Skipped",
-                message="\n".join(skipped)
-            )
+        if self.settings_show_skipped.get():
+            if skipped:    
+                messagebox.showinfo(
+                    title="Skipped",
+                    message="\n".join(skipped)
+                )
 
 
+    @staticmethod
+    def delete(future_destination):
+        if isfile(future_destination):
+            remove(future_destination)
+        elif isdir(future_destination):
+            rmtree(future_destination)
+
+
+    @staticmethod
+    def name_dupe(path):
+        """
+            Renames the file or directory until it doesn't exist
+            in the destination with that name anymore, by appending
+            the filename with an index wrapped in parenthesis.
+            (Windows platforms)
+            file.txt => file (1).txt => file (2).txt
+        """
+
+        if system() != "Windows":
+            raise OSError("For use with Windows filesystems.")
+
+        path_ = path
+        (root, filename) = split(path_)
+
+        if isdir(path_):
+            title=filename
+            ext = None
+        else:
+            (title, ext)=splitext(filename)
+
+        filecount=0
+        while exists(path_):
+            filecount += 1
+            new_title=title + " (" + str(filecount) + ")"
+            if ext:
+                new_title = new_title + ext
+            path_ = join(root, new_title)
+        
+        return path_
+
+
+    @staticmethod
+    def ask_overwrite(future_destination):
+        return messagebox.askyesno(
+            title="Path Conflict",
+            message=f"Overwrite {future_destination}?\n" \
+            f"YES - Overwrite\nNO - Skip"
+        )
+
+
+    def permission_error(self, skipped):
+        messagebox.showerror(
+            "Permission Error",
+            "Run as admin or obtain nessecary permissions "\
+            "from your system administrator."
+        )
+        skipped.append(self.list_box_from.get(0))
+        self.list_box_from.delete(0)
+
+
+    #Toplevels:
     def show_about(self):
         """
             Displays a small dialog and doesn't allow any additional
@@ -533,31 +583,32 @@ class CopyToMoveTo:
             self.about_showing.set(1)
             
             self.about=Toplevel()
-            self.about.resizable(0,0)
-            self.about.geometry("600x400")
-            self.about.update()
-
-            (width_offset, height_offset)=get_offset(self.about)
-            self.about.geometry(f"+{width_offset-75}+{height_offset-75}")
-            self.about.update()
-
             self.about.title("About")
             self.about.iconbitmap(f"{dirname(__file__)}/main_icon.ico")
 
-            with open(f"{dirname(__file__)}/about.txt", "r") as infofile:
-                about_info=infofile.read()
 
-            self.about_message=Message(
+            self.about.geometry("600x400")
+            self.about.resizable(0,0)
+            self.about.update()
+            (width_offset, height_offset)=Ufd.get_offset(self.about)
+            self.about.geometry(f"+{width_offset-75}+{height_offset-75}")
+            self.about.update()
+
+            with open(f"{dirname(__file__)}/about.txt", "r") as aboutfile:
+                about_info=aboutfile.read()
+
+            self.about_message=Label(
                 self.about,
                 text=about_info,
-                width=(self.about.winfo_width() - 25)
+                justify="left",
+                wraplength=(self.about.winfo_width() - 25)
             )
 
             self.about_message.grid(sticky="nsew")
 
             self.about.protocol(
                 "WM_DELETE_WINDOW",
-                lambda: toplevel_close(self.about, self.about_showing)
+                lambda: self.toplevel_close(self.about, self.about_showing)
             )
 
 
@@ -571,56 +622,53 @@ class CopyToMoveTo:
             self.help_showing.set(1)
 
             self.help_window=Toplevel()
-            self.help_window.resizable(0,0)
-            self.help_window.geometry("500x300")
-            self.help_window.update()
-
-            (width_offset, height_offset)=get_offset(self.help_window)
-            self.help_window.geometry(f"+{width_offset+75}+{height_offset-75}")
-            self.help_window.update()
-
-            self.help_window.rowconfigure(0, weight=1)
-            self.help_window.columnconfigure(0, weight=1)
-            self.help_window.columnconfigure(1, weight=1)
-
             self.help_window.title("Help")
             self.help_window.iconbitmap(f"{dirname(__file__)}/main_icon.ico")
 
-            with open(f"{dirname(__file__)}/help.txt", "r") as helpfile:
-                help_info=helpfile.read()
+            self.help_window.geometry("500x300")
+            self.help_window.update()
+            (width_offset, height_offset)=Ufd.get_offset(self.help_window)
+            self.help_window.geometry(f"+{width_offset+75}+{height_offset-75}")
+            self.help_window.update()
 
             self.message_y_scrollbar=Scrollbar(self.help_window, orient="vertical")
 
             self.help_text=Text(
                 self.help_window,
-                width=60,
                 wrap="word",
                 yscrollcommand=self.message_y_scrollbar.set
             )
 
+            self.help_window.rowconfigure(0, weight=1)
+            self.help_window.columnconfigure(0, weight=1)
+
+            self.help_text.grid(row=0, column=0, sticky="nsew")
+            self.message_y_scrollbar.grid(row=0, column=1, sticky="nse")
+
+            self.message_y_scrollbar.config(command=self.help_text.yview)
+
+            with open(f"{dirname(__file__)}/help.txt", "r") as helpfile:
+                help_info=helpfile.read()
+
             self.help_text.insert("end", help_info)
             self.help_text.config(state="disabled")
-            self.help_text.grid(row=0, column=0)
-
-            self.message_y_scrollbar.grid(row=0, column=1, sticky="ns")
-            self.message_y_scrollbar.config(command=self.help_text.yview)
 
             self.help_window.protocol(
                 "WM_DELETE_WINDOW",
-                lambda: toplevel_close(self.help_window, self.help_showing)
+                lambda: self.toplevel_close(self.help_window, self.help_showing)
             )
 
 
     def show_add_items(self, source=True):
-
         ufd = Ufd(
             title="Add Items",
-            show_hidden_files=self.settings_show_hidden_files.get(),
-            include_files=self.settings_include_files_in_tree.get(),
+            show_hidden=self.settings_show_hidden.get(),
+            include_files=self.settings_include_files.get(),
             tree_xscroll=self.settings_tree_xscroll.get(),
             multiselect=self.settings_multiselect.get(),
             select_dirs=self.settings_select_dirs.get(),
             select_files=self.settings_select_files.get(),
+            
         )
 
         dialog_result = ufd()

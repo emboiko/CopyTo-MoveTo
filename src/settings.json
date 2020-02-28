@@ -1,1 +1,1 @@
-{"show_hidden_files": false, "include_files_in_tree": false, "tree_xscroll": false, "ask_overwrite": false, "rename_dupes": false, "multiselect": true, "select_dirs": true, "select_files": true}
+{"geometry": "600x400+1958+1192", "show_hidden": false, "include_files": true, "tree_xscroll": false, "ask_overwrite": false, "rename_dupes": true, "show_skipped": false, "multiselect": true, "select_dirs": true, "select_files": true}

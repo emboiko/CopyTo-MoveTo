@@ -4,7 +4,7 @@ This program was [primarily] created to work around the limitations of built-in 
 
 Upon dragging/dropping files and folders in Windows Explorer, the operating system tries to take its best guess at what the user wants to accomplish, and executes that guess. This is not always efficient, however it is often convenient. This application tries to maintain as much of that convenience as possible, and requires the user to make a deliberate choice between a Copy/Move operation. 
 
-The program's default behavior will bulldoze over any existing data without asking for confirmation to overwrite/delete. It assumes the user knows what they want. This is, however, configurable under settings. Enabling Ask-Overwrite will prompt the user for further action if any paths crash into each other. Rename Duplicates & Ask-Overwrite are mutually exlusive settings.
+The program's default behavior will bulldoze over any existing data without asking for confirmation to overwrite/delete. It assumes the user knows what they want. This is, however, configurable under settings. Enabling Ask Overwrite will prompt the user for further action if any paths crash into each other. Rename Duplicates & Ask Overwrite are mutually exlusive settings.
 
 For bugs, errors, or unexpected program behavior (include your error message) contact:
 	
