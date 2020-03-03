@@ -30,7 +30,7 @@ class CopyToMoveTo:
         """
         self.master = root
         self.master.title("CopyTo-MoveTo")
-        self.master.iconbitmap(f"{dirname(__file__)}/main_icon.ico")
+        self.master.iconbitmap(f"{dirname(__file__)}/icon.ico")
 
         if system() != "Windows":
             self.master.withdraw()
@@ -209,20 +209,20 @@ class CopyToMoveTo:
 
         self.main_menu.add_command(
             label="COPY",
-            command=self.copy_load
+            command=lambda: self.submit(copy=True)
         )
         self.master.bind(
             "<Control-Shift-Return>",
-            lambda event: self.copy_load()
+            lambda event: self.submit(copy=True)
         )
 
         self.main_menu.add_command(
             label="MOVE",
-            command=self.move_load
+            command=lambda: self.submit(copy=False)
         )
         self.master.bind(
             "<Control-Return>",
-            lambda event: self.move_load()
+            lambda event: self.submit(copy=False)
         )
 
         # Body:
@@ -269,14 +269,13 @@ class CopyToMoveTo:
 
 
     def __str__(self):
+        """Return own address"""
         return f"CopyTo-MoveTo @ {hex(id(self))}"
 
 
     #Settings:
     def init_settings(self):
-        """
-            Called on startup, loads, parses, and returns json settings.
-        """
+        """Called on startup, loads, parses, and returns json settings."""
 
         if exists(f"{dirname(__file__)}/settings.json"):
             with open(f"{dirname(__file__)}/settings.json", "r") as settings_file:
@@ -333,8 +332,7 @@ class CopyToMoveTo:
         raise SystemExit
 
     
-    @staticmethod
-    def toplevel_close(dialog, boolean):
+    def toplevel_close(self, dialog, boolean):
         """
             This callback flips the value for a given toplevel_showing boolean
             to false, before disposing of the toplevel.
@@ -363,9 +361,7 @@ class CopyToMoveTo:
 
 
     def clear_all(self):
-        """
-            Clears both listboxes in the main UI, resetting the form.
-        """
+        """Clears both listboxes in the main UI, resetting the form."""
         
         while self.list_box_from.size():
             self.list_box_from.delete(0)
@@ -374,18 +370,68 @@ class CopyToMoveTo:
 
 
     #Copy & Move:
-    def copy_load(self):
-        """
-            Copies each item in the origin list to each path in the destination list.
+    def _copy(self, path, destination):
+        """Wrapper for shutil.copy2() || shutil.copytree()"""
+        
+        try:
+            if isfile(path):
+                copy2(path, destination)
+            else:
+                copytree(path, destination)
+            return True
+        except PermissionError:
+            self.permission_error()
+            return False
 
-            The behavior of this function is subject to the state of global booleans 
-            responsible for program settings. Ask Overwrite and Rename Dupes will alter
-            the way the program handles existing data standing in its way. By default,
-            duplicates are renamed with an index. A messagebox will complain to the user
-            if shutil raises a PermissionError.
+
+    def _move(self, path, destination):
+        """Wrapper for shutil.move()"""
+        
+        try:
+            move(path, destination)
+            return True
+        except PermissionError:
+            self.permission_error()
+            return False
+
+
+    def _delete(path):
+        """Wrapper for os.remove() || shutil.rmtree()"""
+        
+        try:
+            if isfile(path):
+                remove(path)
+            elif isdir(path):
+                rmtree(path)
+            return True
+        except PermissionError:
+            self.permission_error()
+            return False
+
+
+    def submit(self, copy=True):
+        """
+            Move or copy each item in the origin list to the path in the
+            destination list. Supports no more than one destination directory
+            where copy == False.
+
+            Ask Overwrite and Rename Dupes will alter the way we handle 
+            existing data standing in the way. By default, duplicates are 
+            renamed with an index. A messagebox will complain to the user
+            if shutil raises a PermissionError, and the operation is skipped.
         """
 
-        skipped = []
+        if (self.list_box_to.size() > 1) and not copy:
+            messagebox.showwarning(
+                "Invalid Operation",
+                "Move operation only supports a single destination directory."
+            )
+            return
+        
+        if not self.list_box_from.size():
+            return
+
+        self.skipped = []
 
         while self.list_box_to.size():
             destination = self.list_box_to.get(0)
@@ -398,18 +444,14 @@ class CopyToMoveTo:
                 if exists(future_destination):
                     if not self.settings_ask_overwrite.get() \
                     and not self.settings_rename_dupes.get():
-                        try:
-                            self.delete(future_destination)
-                        except PermissionError:
-                            self.permission_error(skipped)
+
+                        if not self._delete(future_destination):
                             continue
 
                     if self.settings_ask_overwrite.get():
-                        if self.ask_overwrite(future_destination):
-                            try:
-                                self.delete(future_destination)
-                            except PermissionError:
-                                self.permission_error(skipped)
+
+                        if self.ask_overwrite(future_destination):    
+                            if not self._delete(future_destination):
                                 continue
 
                         else:
@@ -420,104 +462,23 @@ class CopyToMoveTo:
                     if self.settings_rename_dupes.get():
                         future_destination = self.name_dupe(future_destination)
 
-                try:
-                    if isfile(list_item):
-                        copy2(list_item, future_destination)
-                    else:
-                        copytree(list_item, future_destination)
-                except PermissionError:
-                    self.permission_error(skipped)
-                    continue
+                if copy:
+                    if not self._copy(list_item, future_destination):
+                        continue
+                else:
+                    if not self._move(list_item, future_destination):
+                        continue
 
                 self.list_box_from.delete(0)
 
             self.list_box_to.delete(0)
 
         if self.settings_show_skipped.get():
-            if skipped:    
+            if self.skipped:    
                 messagebox.showinfo(
                     title="Skipped",
-                    message="\n".join(skipped)
+                    message="\n".join(self.skipped)
                 )
-
-
-    def move_load(self):
-        """
-            Moves each item in the origin list to the path in the destination list.
-            Supports no more than one destination directory.
-
-            The behavior of this function is subject to the state of global booleans 
-            responsible for program settings. Ask Overwrite and Rename Dupes will alter
-            the way the program handles existing data standing in its way. By default,
-            duplicates are renamed with an index. A messagebox will complain to the user
-            if shutil raises a PermissionError.
-        """
-
-        skipped = []
-
-        if self.list_box_to.size() > 1:
-            messagebox.showwarning(
-                "Invalid Operation",
-                "Move operation only supports a single destination directory."
-            )
-            return
-
-        destination = self.list_box_to.get(0)
-        
-        while self.list_box_from.size():  
-            list_item = self.list_box_from.get(0)
-            (_, filename) = split(list_item)
-            future_destination = join(destination, filename)
-
-            if exists(future_destination):
-                if not self.settings_ask_overwrite.get() \
-                and not self.settings_rename_dupes.get():
-                    try:
-                        self.delete(future_destination)
-                    except PermissionError:
-                        self.permission_error(skipped)
-                        continue
-
-                if self.settings_ask_overwrite.get():
-                    if self.ask_overwrite(future_destination):
-                        try:
-                            self.delete(future_destination)
-                        except PermissionError:
-                            self.permission_error(skipped)
-                            continue
-
-                    else:
-                        skipped.append(self.list_box_from.get(0))
-                        self.list_box_from.delete(0)
-                        continue
-
-                if self.settings_rename_dupes.get():
-                    destination = self.name_dupe(future_destination)
-
-            try:
-                move(list_item, destination)
-            except PermissionError:
-                self.permission_error(skipped)
-                continue
-
-            self.list_box_from.delete(0)
-
-        self.list_box_to.delete(0)
-
-        if self.settings_show_skipped.get():
-            if skipped:    
-                messagebox.showinfo(
-                    title="Skipped",
-                    message="\n".join(skipped)
-                )
-
-
-    @staticmethod
-    def delete(future_destination):
-        if isfile(future_destination):
-            remove(future_destination)
-        elif isdir(future_destination):
-            rmtree(future_destination)
 
 
     @staticmethod
@@ -553,8 +514,9 @@ class CopyToMoveTo:
         return path_
 
 
-    @staticmethod
     def ask_overwrite(future_destination):
+        """Messagebox result returned as truth value"""
+
         return messagebox.askyesno(
             title="Path Conflict",
             message=f"Overwrite {future_destination}?\n" \
@@ -562,21 +524,11 @@ class CopyToMoveTo:
         )
 
 
-    def permission_error(self, skipped):
-        messagebox.showerror(
-            "Permission Error",
-            "Run as admin or obtain nessecary permissions "\
-            "from your system administrator."
-        )
-        skipped.append(self.list_box_from.get(0))
-        self.list_box_from.delete(0)
-
-
     #Toplevels:
     def show_about(self):
         """
-            Displays a small dialog and doesn't allow any additional
-            instances of itself to be created while it's showing.
+            Displays a static dialog that doesn't allow additional
+            instances of itself to be created while showing.
         """
 
         if self.about_showing.get() == 0:
@@ -584,7 +536,7 @@ class CopyToMoveTo:
             
             self.about=Toplevel()
             self.about.title("About")
-            self.about.iconbitmap(f"{dirname(__file__)}/main_icon.ico")
+            self.about.iconbitmap(f"{dirname(__file__)}/icon.ico")
 
 
             self.about.geometry("600x400")
@@ -614,8 +566,8 @@ class CopyToMoveTo:
 
     def show_help(self):
         """
-            Displays a small scrollable help dialog and doesn't allow any additional
-            instances of itself to be created while it's showing.
+            Displays a scrollable dialog that doesn't allow additional
+            instances of itself to be created while showing.
         """
 
         if self.help_showing.get() == 0:
@@ -623,7 +575,7 @@ class CopyToMoveTo:
 
             self.help_window=Toplevel()
             self.help_window.title("Help")
-            self.help_window.iconbitmap(f"{dirname(__file__)}/main_icon.ico")
+            self.help_window.iconbitmap(f"{dirname(__file__)}/icon.ico")
 
             self.help_window.geometry("500x300")
             self.help_window.update()
@@ -660,6 +612,8 @@ class CopyToMoveTo:
 
 
     def show_add_items(self, source=True):
+        """ Display Ufd w/ appropriate kwargs => Populate GUI w/ result"""
+
         ufd = Ufd(
             title="Add Items",
             show_hidden=self.settings_show_hidden.get(),
