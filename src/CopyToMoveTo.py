@@ -1,4 +1,5 @@
 from tkinter import(
+    PanedWindow,
     BooleanVar,
     Menu,
     Label,
@@ -226,23 +227,36 @@ class CopyToMoveTo:
         )
 
         # Body:
-        self.label_to = Label(self.master, text="Destination(s):")
-        self.label_from = Label(self.master, text="Source(s):")
+        self.paneview = PanedWindow(
+            self.master,
+            sashwidth=7,
+            bg="#cccccc",
+            bd=0,
+            orient="vertical"
+        )
 
-        self.y_scrollbar_from=Scrollbar(self.master, orient="vertical")
-        self.y_scrollbar_to=Scrollbar(self.master, orient="vertical")
-        self.x_scrollbar_from=Scrollbar(self.master, orient="horizontal")
-        self.x_scrollbar_to=Scrollbar(self.master, orient="horizontal")
+        self.top_pane = PanedWindow(self.paneview)
+        self.bottom_pane = PanedWindow(self.paneview)
+        self.paneview.add(self.top_pane)
+        self.paneview.add(self.bottom_pane)
+
+        self.label_from = Label(self.top_pane, text="Source(s):")
+        self.label_to = Label(self.bottom_pane, text="Destination(s):")
+
+        self.y_scrollbar_from=Scrollbar(self.top_pane, orient="vertical")
+        self.x_scrollbar_from=Scrollbar(self.top_pane, orient="horizontal")
+        self.y_scrollbar_to=Scrollbar(self.bottom_pane, orient="vertical")
+        self.x_scrollbar_to=Scrollbar(self.bottom_pane, orient="horizontal")
 
         self.list_box_from=Listbox(
-            self.master,
+            self.top_pane,
             selectmode="extended",
             yscrollcommand=self.y_scrollbar_from.set,
             xscrollcommand=self.x_scrollbar_from.set
         )
 
         self.list_box_to=Listbox(
-            self.master,
+            self.bottom_pane,
             selectmode="extended",
             yscrollcommand=self.y_scrollbar_to.set,
             xscrollcommand=self.x_scrollbar_to.set
@@ -254,18 +268,28 @@ class CopyToMoveTo:
         self.y_scrollbar_to.config(command=self.list_box_to.yview)
 
         # Layout:
-        self.master.grid_rowconfigure(1, weight=1)
-        self.master.grid_rowconfigure(4, weight=1)
-        self.master.grid_columnconfigure(0, weight=1)
+        self.master.rowconfigure(0, weight=1)
+        self.master.columnconfigure(0, weight=1)
 
-        self.label_from.grid(row=0, column=0, sticky="w", columnspan=2)
+        self.top_pane.rowconfigure(1, weight=1)
+        self.top_pane.columnconfigure(0, weight=1)
+        self.bottom_pane.rowconfigure(1, weight=1)
+        self.bottom_pane.columnconfigure(0, weight=1)
+
+        self.paneview.paneconfigure(self.top_pane, minsize=100)
+        self.paneview.paneconfigure(self.bottom_pane, minsize=100)
+
+        self.paneview.grid(row=0, column=0, sticky="nsew")
+
+        self.label_from.grid(row=0, column=0, sticky="w")
         self.list_box_from.grid(row=1, column=0, sticky="nsew")
         self.y_scrollbar_from.grid(row=1, column=1, sticky="ns")
         self.x_scrollbar_from.grid(row=2, column=0, sticky="ew")
-        self.label_to.grid(row=3, column=0, sticky="w", columnspan=2)
-        self.list_box_to.grid(row=4, column=0, sticky="nsew")
-        self.y_scrollbar_to.grid(row=4, column=1, sticky="ns")
-        self.x_scrollbar_to.grid(row=5, column=0, sticky="ew")
+
+        self.label_to.grid(row=0, column=0, sticky="w", columnspan=2)
+        self.list_box_to.grid(row=1, column=0, sticky="nsew")
+        self.y_scrollbar_to.grid(row=1, column=1, sticky="ns")
+        self.x_scrollbar_to.grid(row=2, column=0, sticky="ew")
 
 
     def __str__(self):
@@ -309,7 +333,7 @@ class CopyToMoveTo:
             Similar to utils.toplevel_close().
             writes settings to the disk as json.
         """
-        
+
         settings={
             "geometry" : self.master.geometry(),
             "show_hidden" : self.settings_show_hidden.get(),
@@ -328,8 +352,10 @@ class CopyToMoveTo:
         with open(f"{dirname(__file__)}/settings.json", "w") as settings_file:
             settings_file.write(settings_json)
 
+        if self.dialog_showing.get() == 1:
+            self.ufd.cancel()
+
         self.master.destroy()
-        raise SystemExit
 
     
     def toplevel_close(self, dialog, boolean):
@@ -339,6 +365,7 @@ class CopyToMoveTo:
         """
 
         boolean.set(0)
+
         if repr(dialog).startswith("Ufd"):
             dialog.cancel()
         else:
@@ -544,10 +571,10 @@ class CopyToMoveTo:
 
             self.about.geometry("600x400")
             self.about.resizable(0,0)
-            self.about.update()
+            self.about.update_idletasks()
             (width_offset, height_offset)=Ufd.get_offset(self.about)
             self.about.geometry(f"+{width_offset-75}+{height_offset-75}")
-            self.about.update()
+            self.about.update_idletasks()
 
             with open(f"{dirname(__file__)}/about.txt", "r") as aboutfile:
                 about_info=aboutfile.read()
@@ -581,10 +608,10 @@ class CopyToMoveTo:
             self.help_window.iconbitmap(f"{dirname(__file__)}/icon.ico")
 
             self.help_window.geometry("500x300")
-            self.help_window.update()
+            self.help_window.update_idletasks()
             (width_offset, height_offset)=Ufd.get_offset(self.help_window)
             self.help_window.geometry(f"+{width_offset+75}+{height_offset-75}")
-            self.help_window.update()
+            self.help_window.update_idletasks()
 
             self.message_y_scrollbar=Scrollbar(self.help_window, orient="vertical")
 
