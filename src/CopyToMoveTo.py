@@ -82,10 +82,10 @@ class CopyToMoveTo:
             self.master.update()
         else:
             self.master.geometry("600x400")
-            self.master.update()
+            self.master.update_idletasks()
             (width_offset, height_offset)=Ufd.get_offset(self.master)
             self.master.geometry(f"+{width_offset}+{height_offset}")
-            self.master.update()
+            self.master.update_idletasks()
 
 
         # Menu:
@@ -339,7 +339,10 @@ class CopyToMoveTo:
         """
 
         boolean.set(0)
-        dialog.destroy()
+        if repr(dialog).startswith("Ufd"):
+            dialog.cancel()
+        else:
+            dialog.destroy()
 
 
     #Menu commands:
@@ -614,21 +617,26 @@ class CopyToMoveTo:
     def show_add_items(self, source=True):
         """ Display Ufd w/ appropriate kwargs => Populate GUI w/ result"""
 
-        ufd = Ufd(
-            title="Add Items",
-            show_hidden=self.settings_show_hidden.get(),
-            include_files=self.settings_include_files.get(),
-            tree_xscroll=self.settings_tree_xscroll.get(),
-            multiselect=self.settings_multiselect.get(),
-            select_dirs=self.settings_select_dirs.get(),
-            select_files=self.settings_select_files.get(),
-            
-        )
+        if self.dialog_showing.get() == 0:
+            self.dialog_showing.set(1)
 
-        dialog_result = ufd()
-        
-        for result in dialog_result:
-            if source:
-                self.list_box_from.insert("end",result)
-            else:
-                self.list_box_to.insert("end",result)
+            self.ufd = Ufd(
+                title="Add Items",
+                show_hidden=self.settings_show_hidden.get(),
+                include_files=self.settings_include_files.get(),
+                tree_xscroll=self.settings_tree_xscroll.get(),
+                multiselect=self.settings_multiselect.get(),
+                select_dirs=self.settings_select_dirs.get(),
+                select_files=self.settings_select_files.get(),    
+            )
+
+            self.ufd.dialog.protocol(
+                "WM_DELETE_WINDOW",
+                lambda: self.toplevel_close(self.ufd, self.dialog_showing)
+            )
+
+            for result in self.ufd():
+                if source:
+                    self.list_box_from.insert("end",result)
+                else:
+                    self.list_box_to.insert("end",result)
