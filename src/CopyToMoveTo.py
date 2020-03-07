@@ -357,7 +357,7 @@ class CopyToMoveTo:
 
         self.master.destroy()
 
-    
+
     def toplevel_close(self, dialog, boolean):
         """
             This callback flips the value for a given toplevel_showing boolean
@@ -667,3 +667,5 @@ class CopyToMoveTo:
                     self.list_box_from.insert("end",result)
                 else:
                     self.list_box_to.insert("end",result)
+
+            self.dialog_showing.set(0)
