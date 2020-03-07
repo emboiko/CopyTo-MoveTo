@@ -3,3 +3,4 @@ __pycache__
 __build__
 settings.json
 testkeys.reg
+test.py

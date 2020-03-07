@@ -9,8 +9,7 @@ from tkinter import(
     Text,
     messagebox,
 )
-from posixpath import join, split, splitext, exists, isfile, isdir
-from os.path import dirname
+from os.path import dirname, join, split, splitext, exists, isfile, isdir
 from platform import system
 from json import dumps, loads
 from os import remove
@@ -365,11 +364,7 @@ class CopyToMoveTo:
         """
 
         boolean.set(0)
-
-        if repr(dialog).startswith("Ufd"):
-            dialog.cancel()
-        else:
-            dialog.destroy()
+        dialog.destroy()
 
 
     #Menu commands:
@@ -400,6 +395,7 @@ class CopyToMoveTo:
 
 
     #Copy & Move:
+    #These need a decorator
     def _copy(self, path, destination):
         """Wrapper for shutil.copy2() || shutil.copytree()"""
         
@@ -437,6 +433,10 @@ class CopyToMoveTo:
         except PermissionError:
             self.permission_error()
             return False
+
+
+    def permission_error(self):
+        print("Permission Error - Placeholder")
 
 
     def submit(self, copy=True):
@@ -655,11 +655,6 @@ class CopyToMoveTo:
                 multiselect=self.settings_multiselect.get(),
                 select_dirs=self.settings_select_dirs.get(),
                 select_files=self.settings_select_files.get(),    
-            )
-
-            self.ufd.dialog.protocol(
-                "WM_DELETE_WINDOW",
-                lambda: self.toplevel_close(self.ufd, self.dialog_showing)
             )
 
             for result in self.ufd():
