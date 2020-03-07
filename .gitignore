@@ -1,6 +1,7 @@
 .vscode
 __pycache__
 __build__
+__build__.txt
 settings.json
 testkeys.reg
 test.py

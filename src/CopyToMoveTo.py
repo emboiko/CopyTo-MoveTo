@@ -9,11 +9,12 @@ from tkinter import(
     Text,
     messagebox,
 )
+from shutil import copy2, move, rmtree, copytree
 from os.path import dirname, join, split, splitext, exists, isfile, isdir
+from os import sep, remove
 from platform import system
 from json import dumps, loads
-from os import remove
-from shutil import copy2, move, rmtree, copytree
+from functools import wraps
 
 from Ufd.src.Ufd import Ufd
 
@@ -48,7 +49,7 @@ class CopyToMoveTo:
         self.settings_ask_overwrite.trace("w", self.settings_exclusives)
         self.settings_rename_dupes=BooleanVar(value=True)
         self.settings_rename_dupes.trace("w", self.settings_exclusives)
-        self.settings_show_skipped=BooleanVar()
+        self.settings_show_skipped=BooleanVar(value=True)
         self.settings_multiselect=BooleanVar(value=True)
         self.settings_select_dirs=BooleanVar(value=True)
         self.settings_select_files=BooleanVar(value=True)
@@ -160,7 +161,7 @@ class CopyToMoveTo:
         )
 
         self.settings_menu.add_checkbutton(
-            label="Skipped Items Message",
+            label="Skipped Items Messagebox",
             variable=self.settings_show_skipped,
             onvalue=True,
             offvalue=False
@@ -369,11 +370,7 @@ class CopyToMoveTo:
 
     #Menu commands:
     def clear_selected(self):
-        """
-            Removes selected (highlighted) item(s) from a 
-            given listbox on the main UI in reverse, to avoid
-            indexing errors at runtime.
-        """
+        """Removes selected (highlighted) item(s) from a given listbox"""
 
         selected_1=list(self.list_box_from.curselection())
         selected_2=list(self.list_box_to.curselection())
@@ -387,7 +384,7 @@ class CopyToMoveTo:
 
     def clear_all(self):
         """Clears both listboxes in the main UI, resetting the form."""
-        
+
         while self.list_box_from.size():
             self.list_box_from.delete(0)
         while self.list_box_to.size():
@@ -395,48 +392,46 @@ class CopyToMoveTo:
 
 
     #Copy & Move:
-    #These need a decorator
+    def permission(fn):
+        @wraps(fn)
+        def inner(self, *args, **kwargs):
+            try:
+                fn(self, *args, **kwargs)
+                return True
+            except PermissionError as err:
+                self.skipped.append(
+                    f"{err.args[1]}:\n" + (" => ".join(args))
+                )
+                return False
+
+        return inner
+
+
+    @permission
     def _copy(self, path, destination):
         """Wrapper for shutil.copy2() || shutil.copytree()"""
-        
-        try:
-            if isfile(path):
-                copy2(path, destination)
-            else:
-                copytree(path, destination)
-            return True
-        except PermissionError:
-            self.permission_error()
-            return False
+
+        if isfile(path):
+            copy2(path, destination)
+        else:
+            copytree(path, destination)
 
 
+    @permission
     def _move(self, path, destination):
         """Wrapper for shutil.move()"""
-        
-        try:
-            move(path, destination)
-            return True
-        except PermissionError:
-            self.permission_error()
-            return False
+
+        move(path, destination)
 
 
-    def _delete(path):
+    @permission
+    def _delete(self, path):
         """Wrapper for os.remove() || shutil.rmtree()"""
-        
-        try:
-            if isfile(path):
-                remove(path)
-            elif isdir(path):
-                rmtree(path)
-            return True
-        except PermissionError:
-            self.permission_error()
-            return False
 
-
-    def permission_error(self):
-        print("Permission Error - Placeholder")
+        if isfile(path):
+            remove(path)
+        elif isdir(path):
+            rmtree(path)
 
 
     def submit(self, copy=True):
@@ -447,7 +442,7 @@ class CopyToMoveTo:
 
             Ask Overwrite and Rename Dupes will alter the way we handle 
             existing data standing in the way. By default, duplicates are 
-            renamed with an index. A messagebox will complain to the user
+            renamed with an index. A messagebox can complain to the user
             if shutil raises a PermissionError, and the operation is skipped.
         """
 
@@ -457,19 +452,17 @@ class CopyToMoveTo:
                 "Move operation only supports a single destination directory."
             )
             return
-        
-        if not self.list_box_from.size():
-            return
+
+        self.sources = self.list_box_from.get(0,"end")
+        self.destinations =  self.list_box_to.get(0,"end")
 
         self.skipped = []
 
-        while self.list_box_to.size():
-            destination = self.list_box_to.get(0)
+        for destination in self.destinations:
 
-            while self.list_box_from.size():
-                list_item = self.list_box_from.get(0)
-                (_, filename) = split(list_item)
-                future_destination = join(destination, filename)
+            for source in self.sources:
+                (_, filename) = split(source)
+                future_destination = join(destination + sep, filename)
 
                 if exists(future_destination):
                     if not self.settings_ask_overwrite.get() \
@@ -485,29 +478,29 @@ class CopyToMoveTo:
                                 continue
 
                         else:
-                            skipped.append(self.list_box_from.get(0))
-                            self.list_box_from.delete(0)
+                            self.skipped.append(
+                                f"Cancelled:\n{source} => {future_destination}"
+                            )
                             continue
                     
                     if self.settings_rename_dupes.get():
                         future_destination = self.name_dupe(future_destination)
 
                 if copy:
-                    if not self._copy(list_item, future_destination):
+                    if not self._copy(source, future_destination):
                         continue
                 else:
-                    if not self._move(list_item, future_destination):
+                    if not self._move(source, future_destination):
                         continue
 
-                self.list_box_from.delete(0)
-
-            self.list_box_to.delete(0)
+        self.list_box_from.delete(0, "end")
+        self.list_box_to.delete(0, "end")
 
         if self.settings_show_skipped.get():
             if self.skipped:    
                 messagebox.showinfo(
                     title="Skipped",
-                    message="\n".join(self.skipped)
+                    message="\n\n".join(self.skipped)
                 )
 
 
@@ -544,12 +537,12 @@ class CopyToMoveTo:
         return path_
 
 
-    def ask_overwrite(future_destination):
+    def ask_overwrite(self, future_destination):
         """Messagebox result returned as truth value"""
 
         return messagebox.askyesno(
             title="Path Conflict",
-            message=f"Overwrite {future_destination}?\n" \
+            message=f"Overwrite:\n\n{future_destination}?\n\n" \
             f"YES - Overwrite\nNO - Skip"
         )
 

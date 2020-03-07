@@ -42,13 +42,13 @@ class Ct_Mt:
 
     
     def insert_arg(self, arg):
-        """Slice the prefix and populate the GUI accordingly"""
+        """Slice the prefix, strip double quotes, populate the GUI accordingly"""
 
         if arg.startswith("s|"):
-            self.gui.list_box_from.insert("end", arg[2:])
+            self.gui.list_box_from.insert("end", arg[2:].strip("\""))
             
         elif arg.startswith("d|"):
-            self.gui.list_box_to.insert("end", arg[2:])
+            self.gui.list_box_to.insert("end", arg[2:].strip("\""))
 
 
 def main():
