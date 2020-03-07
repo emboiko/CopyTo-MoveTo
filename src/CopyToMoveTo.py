@@ -49,7 +49,7 @@ class CopyToMoveTo:
         self.settings_ask_overwrite.trace("w", self.settings_exclusives)
         self.settings_rename_dupes=BooleanVar(value=True)
         self.settings_rename_dupes.trace("w", self.settings_exclusives)
-        self.settings_show_skipped=BooleanVar(value=True)
+        self.settings_show_skipped=BooleanVar()
         self.settings_multiselect=BooleanVar(value=True)
         self.settings_select_dirs=BooleanVar(value=True)
         self.settings_select_files=BooleanVar(value=True)
@@ -297,7 +297,6 @@ class CopyToMoveTo:
         return f"CopyTo-MoveTo @ {hex(id(self))}"
 
 
-    #Settings:
     def init_settings(self):
         """Called on startup, loads, parses, and returns json settings."""
 
@@ -368,7 +367,6 @@ class CopyToMoveTo:
         dialog.destroy()
 
 
-    #Menu commands:
     def clear_selected(self):
         """Removes selected (highlighted) item(s) from a given listbox"""
 
@@ -385,13 +383,10 @@ class CopyToMoveTo:
     def clear_all(self):
         """Clears both listboxes in the main UI, resetting the form."""
 
-        while self.list_box_from.size():
-            self.list_box_from.delete(0)
-        while self.list_box_to.size():
-            self.list_box_to.delete(0)
+        self.list_box_from.delete(0, "end")
+        self.list_box_to.delete(0, "end")
 
 
-    #Copy & Move:
     def permission(fn):
         @wraps(fn)
         def inner(self, *args, **kwargs):
@@ -399,7 +394,7 @@ class CopyToMoveTo:
                 fn(self, *args, **kwargs)
                 return True
             except PermissionError as err:
-                self.skipped.append(
+                self.skipped_err.append(
                     f"{err.args[1]}:\n" + (" => ".join(args))
                 )
                 return False
@@ -456,7 +451,8 @@ class CopyToMoveTo:
         self.sources = self.list_box_from.get(0,"end")
         self.destinations =  self.list_box_to.get(0,"end")
 
-        self.skipped = []
+        self.skipped_ok = []
+        self.skipped_err = []
 
         for destination in self.destinations:
 
@@ -478,7 +474,7 @@ class CopyToMoveTo:
                                 continue
 
                         else:
-                            self.skipped.append(
+                            self.skipped_ok.append(
                                 f"Cancelled:\n{source} => {future_destination}"
                             )
                             continue
@@ -497,10 +493,16 @@ class CopyToMoveTo:
         self.list_box_to.delete(0, "end")
 
         if self.settings_show_skipped.get():
-            if self.skipped:    
+            if self.skipped_ok:    
                 messagebox.showinfo(
                     title="Skipped",
                     message="\n\n".join(self.skipped)
+                )
+        
+        if self.skipped_err:
+                messagebox.showinfo(
+                    title="Permission Error(s)",
+                    message="\n\n".join(self.skipped_err)
                 )
 
 

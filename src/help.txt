@@ -45,6 +45,9 @@ Prompts the user for further action if the program encounters existing files/dir
 - Rename Duplicates:
 Renames the file until a given path conflic is resolved, by appending an index to the filename. (Mutually exclusive with Ask Overwrite)
 
+- Skipped Items Messagebox:
+Enable / Disable a prompt that displays items skipped during operations via Ask Overwrite
+
 - Multiselect:
 Enable / Disable multiselect in the dialog's list-selection area. 
 
@@ -59,12 +62,16 @@ Enable / Disable file entries in the dialog's list-selection area.
 Tips & Tricks:
 --------------
 
-To enable a context menu entry or entries in Windows Explorer, edit regkeys.reg with a proper path to the application. This makes using CopyTo-MoveTo alongside windows explorer much more streamlined.
+-One instance of the application is allowed to run at a time.
 
-Drill through the treeview with Doubleclick, Enter, or ArrowKeys. Directories are lazy loaded, and only read once.
+-Run as administrator to avoid permission errors in most situations. Permission errors thrown from a move operation may still result in a copy.
 
-Navigate the listbox on the right with the mouse or arrow keys. Multiselect is supported with the Shift key, or by dragging the mouse. Select all with <Ctrl+A> as expected. Confirm selection in the filedialog with Enter. 
+-To enable a context menu entry or entries in Windows Explorer, edit regkeys.reg with a proper path to the application. This makes using CopyTo-MoveTo alongside windows explorer much more streamlined.
 
-Drag + drop files/directories to CopyTo-MoveTo.exe's shortcut to run the application with those paths as arguments. Currently hardcoded to populate to origin listbox.
+-Drill through the treeview with Doubleclick, Enter, or ArrowKeys. Directories are lazy loaded, and only read once.
 
-The listboxes in the main window can be populated multiple times, and are only cleared upon a Copy/Move operation, or if the user deliberately clears them using the menu operations.
+-Navigate the listbox on the right with the mouse or arrow keys. Multiselect is supported with the Shift, Ctrl, or by dragging the mouse. Select all with <Ctrl+A> as expected. Confirm selection in the filedialog with Enter. 
+
+-Drag + drop files/directories to CopyTo-MoveTo.exe's shortcut to run the application with those paths as arguments. Currently hardcoded to populate to origin listbox.
+
+-The listboxes in the main window can be populated multiple times, and are only cleared upon a Copy/Move operation, or if the user deliberately clears them using the menu operations.
