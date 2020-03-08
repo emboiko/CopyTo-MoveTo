@@ -45,10 +45,10 @@ class Ct_Mt:
         """Slice the prefix, strip double quotes, populate the GUI accordingly"""
 
         if arg.startswith("s|"):
-            self.gui.list_box_from.insert("end", arg[2:].strip("\""))
+            self.gui.list_box_source.insert("end", arg[2:].strip("\""))
             
         elif arg.startswith("d|"):
-            self.gui.list_box_to.insert("end", arg[2:].strip("\""))
+            self.gui.list_box_dest.insert("end", arg[2:].strip("\""))
 
 
 def main():
