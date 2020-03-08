@@ -101,21 +101,21 @@ class CopyToMoveTo:
         self.file_menu.add_command(
             label="Open Source(s)",
             accelerator="Ctrl+O",
-            command=lambda: self.show_add_items(source=True)
+            command=lambda: self.show_ufd(source=True)
         )
         self.master.bind(
             "<Control-o>",
-            lambda event: self.show_add_items(source=True)
+            lambda event: self.show_ufd(source=True)
         )
 
         self.file_menu.add_command(
             label="Open Destination(s)",
             accelerator="Ctrl+K+O",
-            command=lambda: self.show_add_items(source=False)
+            command=lambda: self.show_ufd(source=False)
         )
         self.master.bind(
             "<Control-k>o",
-            lambda event: self.show_add_items(source=False)
+            lambda event: self.show_ufd(source=False)
         )
 
         self.file_menu.add_separator()
@@ -240,32 +240,32 @@ class CopyToMoveTo:
         self.paneview.add(self.top_pane)
         self.paneview.add(self.bottom_pane)
 
-        self.label_from = Label(self.top_pane, text="Source(s):")
-        self.label_to = Label(self.bottom_pane, text="Destination(s):")
+        self.label_source = Label(self.top_pane, text="Source(s):")
+        self.label_dest = Label(self.bottom_pane, text="Destination(s):")
 
-        self.y_scrollbar_from=Scrollbar(self.top_pane, orient="vertical")
-        self.x_scrollbar_from=Scrollbar(self.top_pane, orient="horizontal")
-        self.y_scrollbar_to=Scrollbar(self.bottom_pane, orient="vertical")
-        self.x_scrollbar_to=Scrollbar(self.bottom_pane, orient="horizontal")
+        self.y_scrollbar_source=Scrollbar(self.top_pane, orient="vertical")
+        self.x_scrollbar_source=Scrollbar(self.top_pane, orient="horizontal")
+        self.y_scrollbar_dest=Scrollbar(self.bottom_pane, orient="vertical")
+        self.x_scrollbar_dest=Scrollbar(self.bottom_pane, orient="horizontal")
 
-        self.list_box_from=Listbox(
+        self.list_box_source=Listbox(
             self.top_pane,
             selectmode="extended",
-            yscrollcommand=self.y_scrollbar_from.set,
-            xscrollcommand=self.x_scrollbar_from.set
+            yscrollcommand=self.y_scrollbar_source.set,
+            xscrollcommand=self.x_scrollbar_source.set
         )
 
-        self.list_box_to=Listbox(
+        self.list_box_dest=Listbox(
             self.bottom_pane,
             selectmode="extended",
-            yscrollcommand=self.y_scrollbar_to.set,
-            xscrollcommand=self.x_scrollbar_to.set
+            yscrollcommand=self.y_scrollbar_dest.set,
+            xscrollcommand=self.x_scrollbar_dest.set
         )
 
-        self.x_scrollbar_from.config(command=self.list_box_from.xview)
-        self.y_scrollbar_from.config(command=self.list_box_from.yview)
-        self.x_scrollbar_to.config(command=self.list_box_to.xview)
-        self.y_scrollbar_to.config(command=self.list_box_to.yview)
+        self.x_scrollbar_source.config(command=self.list_box_source.xview)
+        self.y_scrollbar_source.config(command=self.list_box_source.yview)
+        self.x_scrollbar_dest.config(command=self.list_box_dest.xview)
+        self.y_scrollbar_dest.config(command=self.list_box_dest.yview)
 
         # Layout:
         self.master.rowconfigure(0, weight=1)
@@ -281,15 +281,15 @@ class CopyToMoveTo:
 
         self.paneview.grid(row=0, column=0, sticky="nsew")
 
-        self.label_from.grid(row=0, column=0, sticky="w")
-        self.list_box_from.grid(row=1, column=0, sticky="nsew")
-        self.y_scrollbar_from.grid(row=1, column=1, sticky="ns")
-        self.x_scrollbar_from.grid(row=2, column=0, sticky="ew")
+        self.label_source.grid(row=0, column=0, sticky="w")
+        self.list_box_source.grid(row=1, column=0, sticky="nsew")
+        self.y_scrollbar_source.grid(row=1, column=1, sticky="ns")
+        self.x_scrollbar_source.grid(row=2, column=0, sticky="ew")
 
-        self.label_to.grid(row=0, column=0, sticky="w", columnspan=2)
-        self.list_box_to.grid(row=1, column=0, sticky="nsew")
-        self.y_scrollbar_to.grid(row=1, column=1, sticky="ns")
-        self.x_scrollbar_to.grid(row=2, column=0, sticky="ew")
+        self.label_dest.grid(row=0, column=0, sticky="w", columnspan=2)
+        self.list_box_dest.grid(row=1, column=0, sticky="nsew")
+        self.y_scrollbar_dest.grid(row=1, column=1, sticky="ns")
+        self.x_scrollbar_dest.grid(row=2, column=0, sticky="ew")
 
 
     def __str__(self):
@@ -370,30 +370,28 @@ class CopyToMoveTo:
     def clear_selected(self):
         """Removes selected (highlighted) item(s) from a given listbox"""
 
-        selected_1=list(self.list_box_from.curselection())
-        selected_2=list(self.list_box_to.curselection())
-        selected_1.reverse()
-        selected_2.reverse()
-        for i in selected_1:
-            self.list_box_from.delete(i)
-        for i in selected_2:
-            self.list_box_to.delete(i)
+        for i in reversed(list(self.list_box_source.curselection())):
+            self.list_box_source.delete(i)
+        for i in reversed(list(self.list_box_dest.curselection())):
+            self.list_box_dest.delete(i)
 
 
     def clear_all(self):
         """Clears both listboxes in the main UI, resetting the form."""
 
-        self.list_box_from.delete(0, "end")
-        self.list_box_to.delete(0, "end")
+        self.list_box_source.delete(0, "end")
+        self.list_box_dest.delete(0, "end")
 
 
-    def permission(fn):
+    def handled(fn):
+        """Filesystem operations are wrapped here for error handling"""
+
         @wraps(fn)
         def inner(self, *args, **kwargs):
             try:
                 fn(self, *args, **kwargs)
                 return True
-            except PermissionError as err:
+            except (PermissionError, FileNotFoundError) as err:
                 self.skipped_err.append(
                     f"{err.args[1]}:\n" + (" => ".join(args))
                 )
@@ -402,7 +400,7 @@ class CopyToMoveTo:
         return inner
 
 
-    @permission
+    @handled
     def _copy(self, path, destination):
         """Wrapper for shutil.copy2() || shutil.copytree()"""
 
@@ -412,14 +410,14 @@ class CopyToMoveTo:
             copytree(path, destination)
 
 
-    @permission
+    @handled
     def _move(self, path, destination):
         """Wrapper for shutil.move()"""
 
         move(path, destination)
 
 
-    @permission
+    @handled
     def _delete(self, path):
         """Wrapper for os.remove() || shutil.rmtree()"""
 
@@ -441,22 +439,24 @@ class CopyToMoveTo:
             if shutil raises a PermissionError, and the operation is skipped.
         """
 
-        if (self.list_box_to.size() > 1) and not copy:
+        if (self.list_box_dest.size() > 1) and not copy:
             messagebox.showwarning(
                 "Invalid Operation",
                 "Move operation only supports a single destination directory."
             )
             return
 
-        self.sources = self.list_box_from.get(0,"end")
-        self.destinations =  self.list_box_to.get(0,"end")
+        sources = self.list_box_source.get(0,"end")
+        destinations =  self.list_box_dest.get(0,"end")
 
         self.skipped_ok = []
         self.skipped_err = []
 
-        for destination in self.destinations:
+        for j, destination in enumerate(destinations):
 
-            for source in self.sources:
+            for i, source in enumerate(sources):
+                self.progress(i, j)
+
                 (_, filename) = split(source)
                 future_destination = join(destination + sep, filename)
 
@@ -478,7 +478,7 @@ class CopyToMoveTo:
                                 f"Cancelled:\n{source} => {future_destination}"
                             )
                             continue
-                    
+
                     if self.settings_rename_dupes.get():
                         future_destination = self.name_dupe(future_destination)
 
@@ -489,8 +489,8 @@ class CopyToMoveTo:
                     if not self._move(source, future_destination):
                         continue
 
-        self.list_box_from.delete(0, "end")
-        self.list_box_to.delete(0, "end")
+        self.list_box_source.delete(0, "end")
+        self.list_box_dest.delete(0, "end")
 
         if self.settings_show_skipped.get():
             if self.skipped_ok:    
@@ -498,10 +498,10 @@ class CopyToMoveTo:
                     title="Skipped",
                     message="\n\n".join(self.skipped)
                 )
-        
+
         if self.skipped_err:
-                messagebox.showinfo(
-                    title="Permission Error(s)",
+                messagebox.showerror(
+                    title="Error(s)",
                     message="\n\n".join(self.skipped_err)
                 )
 
@@ -535,7 +535,7 @@ class CopyToMoveTo:
             if ext:
                 new_title = new_title + ext
             path_ = join(root, new_title)
-        
+
         return path_
 
 
@@ -549,6 +549,24 @@ class CopyToMoveTo:
         )
 
 
+    def progress(self, i, j):
+        """Visualize operands in GUI during operations"""
+
+        for y, source in enumerate(self.list_box_source.get(0, "end")):
+            if y != i:
+                self.list_box_source.itemconfigure(y, bg="#FFFFFF", fg="#000000")
+            else:
+                self.list_box_source.itemconfigure(y, bg="#cccccc", fg="#000000")
+
+        for x, destination in enumerate(self.list_box_dest.get(0, "end")):
+            if x != j:
+                self.list_box_dest.itemconfigure(x, bg="#FFFFFF", fg="#000000")
+            else:
+                self.list_box_dest.itemconfigure(x, bg="#cccccc", fg="#000000")
+
+        self.master.update()
+
+
     #Toplevels:
     def show_about(self):
         """
@@ -558,35 +576,40 @@ class CopyToMoveTo:
 
         if self.about_showing.get() == 0:
             self.about_showing.set(1)
-            
-            self.about=Toplevel()
-            self.about.title("About")
-            self.about.iconbitmap(f"{dirname(__file__)}/icon.ico")
 
+            try:
+                with open(f"{dirname(__file__)}/about.txt", "r") as aboutfile:
+                    about_info=aboutfile.read()
+            except FileNotFoundError:
+                messagebox.showerror("Error", "File not found")
+                self.about_showing.set(0)
+                return
 
-            self.about.geometry("600x400")
-            self.about.resizable(0,0)
-            self.about.update_idletasks()
-            (width_offset, height_offset)=Ufd.get_offset(self.about)
-            self.about.geometry(f"+{width_offset-75}+{height_offset-75}")
-            self.about.update_idletasks()
+            else:
+                self.about=Toplevel()
+                self.about.title("About")
+                self.about.iconbitmap(f"{dirname(__file__)}/icon.ico")
 
-            with open(f"{dirname(__file__)}/about.txt", "r") as aboutfile:
-                about_info=aboutfile.read()
+                self.about.geometry("600x400")
+                self.about.resizable(0,0)
+                self.about.update_idletasks()
+                (width_offset, height_offset)=Ufd.get_offset(self.about)
+                self.about.geometry(f"+{width_offset-75}+{height_offset-75}")
+                self.about.update_idletasks()
 
-            self.about_message=Label(
-                self.about,
-                text=about_info,
-                justify="left",
-                wraplength=(self.about.winfo_width() - 25)
-            )
+                self.about_message=Label(
+                    self.about,
+                    text=about_info,
+                    justify="left",
+                    wraplength=(self.about.winfo_width() - 25)
+                )
 
-            self.about_message.grid(sticky="nsew")
+                self.about_message.grid(sticky="nsew")
 
-            self.about.protocol(
-                "WM_DELETE_WINDOW",
-                lambda: self.toplevel_close(self.about, self.about_showing)
-            )
+                self.about.protocol(
+                    "WM_DELETE_WINDOW",
+                    lambda: self.toplevel_close(self.about, self.about_showing)
+                )
 
 
     def show_help(self):
@@ -598,45 +621,51 @@ class CopyToMoveTo:
         if self.help_showing.get() == 0:
             self.help_showing.set(1)
 
-            self.help_window=Toplevel()
-            self.help_window.title("Help")
-            self.help_window.iconbitmap(f"{dirname(__file__)}/icon.ico")
+            try:
+                with open(f"{dirname(__file__)}/help.txt", "r") as helpfile:
+                    help_info=helpfile.read()
+            except FileNotFoundError:
+                messagebox.showerror("Error", "File not found")
+                self.help_showing.set(0)
+                return
 
-            self.help_window.geometry("500x300")
-            self.help_window.update_idletasks()
-            (width_offset, height_offset)=Ufd.get_offset(self.help_window)
-            self.help_window.geometry(f"+{width_offset+75}+{height_offset-75}")
-            self.help_window.update_idletasks()
+            else:
+                self.help_window=Toplevel()
+                self.help_window.title("Help")
+                self.help_window.iconbitmap(f"{dirname(__file__)}/icon.ico")
 
-            self.message_y_scrollbar=Scrollbar(self.help_window, orient="vertical")
+                self.help_window.geometry("500x300")
+                self.help_window.update_idletasks()
+                (width_offset, height_offset)=Ufd.get_offset(self.help_window)
+                self.help_window.geometry(f"+{width_offset+75}+{height_offset-75}")
+                self.help_window.update_idletasks()
 
-            self.help_text=Text(
-                self.help_window,
-                wrap="word",
-                yscrollcommand=self.message_y_scrollbar.set
-            )
+                self.message_y_scrollbar=Scrollbar(self.help_window, orient="vertical")
 
-            self.help_window.rowconfigure(0, weight=1)
-            self.help_window.columnconfigure(0, weight=1)
+                self.help_text=Text(
+                    self.help_window,
+                    wrap="word",
+                    yscrollcommand=self.message_y_scrollbar.set
+                )
 
-            self.help_text.grid(row=0, column=0, sticky="nsew")
-            self.message_y_scrollbar.grid(row=0, column=1, sticky="nse")
+                self.help_window.rowconfigure(0, weight=1)
+                self.help_window.columnconfigure(0, weight=1)
 
-            self.message_y_scrollbar.config(command=self.help_text.yview)
+                self.help_text.grid(row=0, column=0, sticky="nsew")
+                self.message_y_scrollbar.grid(row=0, column=1, sticky="nse")
 
-            with open(f"{dirname(__file__)}/help.txt", "r") as helpfile:
-                help_info=helpfile.read()
+                self.message_y_scrollbar.config(command=self.help_text.yview)
 
-            self.help_text.insert("end", help_info)
-            self.help_text.config(state="disabled")
+                self.help_text.insert("end", help_info)
+                self.help_text.config(state="disabled")
 
-            self.help_window.protocol(
-                "WM_DELETE_WINDOW",
-                lambda: self.toplevel_close(self.help_window, self.help_showing)
-            )
+                self.help_window.protocol(
+                    "WM_DELETE_WINDOW",
+                    lambda: self.toplevel_close(self.help_window, self.help_showing)
+                )
 
 
-    def show_add_items(self, source=True):
+    def show_ufd(self, source=True):
         """ Display Ufd w/ appropriate kwargs => Populate GUI w/ result"""
 
         if self.dialog_showing.get() == 0:
@@ -654,8 +683,8 @@ class CopyToMoveTo:
 
             for result in self.ufd():
                 if source:
-                    self.list_box_from.insert("end",result)
+                    self.list_box_source.insert("end",result)
                 else:
-                    self.list_box_to.insert("end",result)
+                    self.list_box_dest.insert("end",result)
 
             self.dialog_showing.set(0)
