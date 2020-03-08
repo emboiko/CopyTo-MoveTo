@@ -15,6 +15,7 @@ from os import sep, remove
 from platform import system
 from json import dumps, loads
 from functools import wraps
+from threading import Thread
 
 from Ufd.src.Ufd import Ufd
 
@@ -210,20 +211,20 @@ class CopyToMoveTo:
 
         self.main_menu.add_command(
             label="COPY",
-            command=lambda: self.submit(copy=True)
+            command=lambda: self._submit(copy=True)
         )
         self.master.bind(
             "<Control-Shift-Return>",
-            lambda event: self.submit(copy=True)
+            lambda event: self._submit(copy=True)
         )
 
         self.main_menu.add_command(
             label="MOVE",
-            command=lambda: self.submit(copy=False)
+            command=lambda: self._submit(copy=False)
         )
         self.master.bind(
             "<Control-Return>",
-            lambda event: self.submit(copy=False)
+            lambda event: self._submit(copy=False)
         )
 
         # Body:
@@ -294,6 +295,7 @@ class CopyToMoveTo:
 
     def __str__(self):
         """Return own address"""
+
         return f"CopyTo-MoveTo @ {hex(id(self))}"
 
 
@@ -427,7 +429,39 @@ class CopyToMoveTo:
             rmtree(path)
 
 
-    def submit(self, copy=True):
+    def disabled_ui(fn):
+        """Menubar is disabled during operations"""
+
+        @wraps(fn)
+        def inner(self, *args, **kwargs):
+            self.main_menu.entryconfig("File", state="disabled")
+            self.main_menu.entryconfig("Settings", state="disabled")
+            self.main_menu.entryconfig("Clear Selected", state="disabled")
+            self.main_menu.entryconfig("Clear All", state="disabled")
+            self.main_menu.entryconfig("COPY", state="disabled")
+            self.main_menu.entryconfig("MOVE", state="disabled")
+
+            fn(self, *args, **kwargs)
+
+            self.main_menu.entryconfig("File", state="normal")
+            self.main_menu.entryconfig("Settings", state="normal")
+            self.main_menu.entryconfig("Clear Selected", state="normal")
+            self.main_menu.entryconfig("Clear All", state="normal")
+            self.main_menu.entryconfig("COPY", state="normal")
+            self.main_menu.entryconfig("MOVE", state="normal")
+
+        return inner
+
+
+    def _submit(self, copy):
+        """Thread/wrapper for submit() so we don't block the UI during operations"""
+
+        self.thread = Thread(target=self.submit, args=(copy,), daemon=True)
+        self.thread.start()
+
+
+    @disabled_ui
+    def submit(self, copy):
         """
             Move or copy each item in the origin list to the path in the
             destination list. Supports no more than one destination directory
@@ -481,7 +515,7 @@ class CopyToMoveTo:
 
                     if self.settings_rename_dupes.get():
                         future_destination = self.name_dupe(future_destination)
-
+                        
                 if copy:
                     if not self._copy(source, future_destination):
                         continue
@@ -496,7 +530,7 @@ class CopyToMoveTo:
             if self.skipped_ok:    
                 messagebox.showinfo(
                     title="Skipped",
-                    message="\n\n".join(self.skipped)
+                    message="\n\n".join(self.skipped_ok)
                 )
 
         if self.skipped_err:
@@ -550,15 +584,20 @@ class CopyToMoveTo:
 
 
     def progress(self, i, j):
-        """Visualize operands in GUI during operations"""
+        """
+            Visualize operands in GUI during operations
 
-        for y, source in enumerate(self.list_box_source.get(0, "end")):
+            i = current source operand index
+            j = current destination operand index
+        """
+
+        for y, _ in enumerate(self.list_box_source.get(0, "end")):
             if y != i:
                 self.list_box_source.itemconfigure(y, bg="#FFFFFF", fg="#000000")
             else:
                 self.list_box_source.itemconfigure(y, bg="#cccccc", fg="#000000")
 
-        for x, destination in enumerate(self.list_box_dest.get(0, "end")):
+        for x, _ in enumerate(self.list_box_dest.get(0, "end")):
             if x != j:
                 self.list_box_dest.itemconfigure(x, bg="#FFFFFF", fg="#000000")
             else:
