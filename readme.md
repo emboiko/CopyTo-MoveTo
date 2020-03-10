@@ -8,7 +8,7 @@
 
 `git clone https://github.com/emboiko/CopyTo-MoveTo.git` (or grab the .zip)
 
-`python CopyTo-MoveTo.py`
+`python CopyTo-MoveTo/src/main.py`
 
 **-or-**
 
