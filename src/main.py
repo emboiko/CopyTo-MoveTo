@@ -32,13 +32,13 @@ class Ct_Mt:
         return f"CopyTo-MoveTo wrapper @{hex(id(self))}"
 
 
-    def arg_handler(self, args):
+    def arg_handler(self, arg):
         """
             Observer calls back once for each argument, which we pass to the
             GUI & remove from the collection. 
         """
 
-        self.insert_arg(args.pop())
+        self.insert_arg(arg)
 
     
     def insert_arg(self, arg):
@@ -50,6 +50,8 @@ class Ct_Mt:
         elif arg.startswith("d|"):
             self.gui.list_box_dest.insert("end", arg[2:].strip("\""))
 
+        else:
+            self.gui.list_box_source.insert("end", arg)
 
 def main():
     Ct_Mt()
