@@ -53,7 +53,9 @@ class CopyToMoveTo:
         self.settings_show_skipped=BooleanVar()
         self.settings_multiselect=BooleanVar(value=True)
         self.settings_select_dirs=BooleanVar(value=True)
+        self.settings_select_dirs.trace("w", self.settings_mutuals)
         self.settings_select_files=BooleanVar(value=True)
+        self.settings_select_files.trace("w", self.settings_mutuals)
         self.settings_geometry = None
 
         self.settings=self.init_settings()
@@ -329,6 +331,23 @@ class CopyToMoveTo:
                 return 
 
 
+    def settings_mutuals(self, *args):
+        """
+            Prevent select folders & select files from being disabled concurrently
+
+            If both are unselected, reselect the one we didn't just deselect on.
+        """
+
+        if self.settings_select_dirs.get() == 0 \
+        and self.settings_select_files.get() == 0:
+
+            if args[0] == "PY_VAR7":
+                self.settings_select_files.set(1)
+        
+            elif args[0] == "PY_VAR8":
+                self.settings_select_dirs.set(1)
+
+
     def master_close(self):
         """
             Similar to utils.toplevel_close().
@@ -487,6 +506,10 @@ class CopyToMoveTo:
         self.skipped_err = []
 
         for j, destination in enumerate(destinations):
+
+            if isfile(destination):
+                self.skipped_err.append(f"Invalid destination: {destination}")
+                continue
 
             for i, source in enumerate(sources):
                 self.progress(i, j)
@@ -717,7 +740,8 @@ class CopyToMoveTo:
                 tree_xscroll=self.settings_tree_xscroll.get(),
                 multiselect=self.settings_multiselect.get(),
                 select_dirs=self.settings_select_dirs.get(),
-                select_files=self.settings_select_files.get(),    
+                select_files=self.settings_select_files.get(),
+                unix_delimiter=False,    
             )
 
             for result in self.ufd():

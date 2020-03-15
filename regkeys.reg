@@ -20,10 +20,6 @@ Windows Registry Editor Version 5.00
 ;Destinations
 ;------------
 
-;Files:
-[HKEY_CLASSES_ROOT\*\shell\CopyTo-MoveTo as destination\command]
-@="C:\\Path\\To\\CopyTo-MoveTo.exe \"d|%1\""
-
 ;Directories:
 [HKEY_CLASSES_ROOT\directory\shell\CopyTo-MoveTo as destination\command]
 @="C:\\Path\\To\\CopyTo-MoveTo.exe \"d|%1\""
@@ -45,9 +41,6 @@ Windows Registry Editor Version 5.00
 
 ; [HKEY_CLASSES_ROOT\directory\background\shell\CopyTo-MoveTo as source\command]
 ; @="C:\\Path\\To\\Python_Interpreter C:\\Path\\To\\CopyTo-MoveTo\\src\\main.py \"s|%v\""
-
-; [HKEY_CLASSES_ROOT\*\shell\CopyTo-MoveTo as destination\command]
-; @="C:\\Path\\To\\Python_Interpreter C:\\Path\\To\\CopyTo-MoveTo\\src\\main.py \"d|%1\""
 
 ; [HKEY_CLASSES_ROOT\directory\shell\CopyTo-MoveTo as destination\command]
 ; @="C:\\Path\\To\\Python_Interpreter C:\\Path\\To\\CopyTo-MoveTo\\src\\main.py \"d|%1\""
