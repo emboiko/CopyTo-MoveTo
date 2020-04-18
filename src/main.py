@@ -2,6 +2,7 @@ from tkinter import Tk
 from CopyToMoveTo import CopyToMoveTo
 from Socket_Singleton.Socket_Singleton import Socket_Singleton
 
+
 class Ct_Mt:
     """
         Wrapper class for GUI & Socket_Singleton
@@ -12,7 +13,7 @@ class Ct_Mt:
             Immediately enforce singleton status, init Tk GUI, init args,
             and attatch the observer / callback for subsequent arguments
         """
-        
+
         self.app = Socket_Singleton()
         self.root = Tk()
         self.gui = CopyToMoveTo(self.root)
@@ -25,7 +26,7 @@ class Ct_Mt:
         self.app.trace(self.arg_handler)
         self.root.mainloop()
 
-    
+
     def __str__(self):
         """Return own address"""
 
@@ -40,7 +41,7 @@ class Ct_Mt:
 
         self.insert_arg(arg)
 
-    
+
     def insert_arg(self, arg):
         """Slice the prefix, strip double quotes, populate the GUI accordingly"""
 
@@ -52,6 +53,7 @@ class Ct_Mt:
 
         else:
             self.gui.list_box_source.insert("end", arg)
+
 
 def main():
     Ct_Mt()

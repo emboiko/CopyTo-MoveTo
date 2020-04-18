@@ -5,5 +5,4 @@ __build__
 __build__.txt
 settings.json
 testkeys.reg
-test.py
 CopyTo-MoveTo.spec

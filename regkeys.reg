@@ -2,29 +2,44 @@ Windows Registry Editor Version 5.00
 
 ;Rememeber to use the double-backslash "\\" in your paths.
 
-;Sources
-;-------
+    ;Sources
+    ;-------
 
 ;Files:
+[HKEY_CLASSES_ROOT\*\shell\CopyTo-MoveTo as source]
+"MultiSelectModel"="Player"
+
 [HKEY_CLASSES_ROOT\*\shell\CopyTo-MoveTo as source\command]
 @="C:\\Path\\To\\CopyTo-MoveTo.exe \"s|%1\""
 
 ;Directories:
+[HKEY_CLASSES_ROOT\directory\shell\CopyTo-MoveTo as source]
+"MultiSelectModel"="Player"
+
 [HKEY_CLASSES_ROOT\directory\shell\CopyTo-MoveTo as source\command]
 @="C:\\Path\\To\\CopyTo-MoveTo.exe \"s|%1\""
 
 ;Directory background:
+[HKEY_CLASSES_ROOT\directory\background\shell\CopyTo-MoveTo as source]
+"MultiSelectModel"="Player"
+
 [HKEY_CLASSES_ROOT\directory\background\shell\CopyTo-MoveTo as source\command]
 @="C:\\Path\\To\\CopyTo-MoveTo.exe \"s|%v\""
 
-;Destinations
-;------------
+    ;Destinations
+    ;------------
 
 ;Directories:
+[HKEY_CLASSES_ROOT\directory\shell\CopyTo-MoveTo as destination]
+"MultiSelectModel"="Player"
+
 [HKEY_CLASSES_ROOT\directory\shell\CopyTo-MoveTo as destination\command]
 @="C:\\Path\\To\\CopyTo-MoveTo.exe \"d|%1\""
 
 ;Directory background:
+[HKEY_CLASSES_ROOT\directory\background\shell\CopyTo-MoveTo as destination]
+"MultiSelectModel"="Player"
+
 [HKEY_CLASSES_ROOT\directory\background\shell\CopyTo-MoveTo as destination\command]
 @="C:\\Path\\To\\CopyTo-MoveTo.exe \"d|%v\""
 
@@ -33,17 +48,43 @@ Windows Registry Editor Version 5.00
 ;comment the keys above and uncomment the keys below
 ;---------------------------------------------------
 
+;     ;Sources
+;     ;-------
+
+; ;Files:
+; [HKEY_CLASSES_ROOT\*\shell\CopyTo-MoveTo as source]
+; "MultiSelectModel"="Player"
+
 ; [HKEY_CLASSES_ROOT\*\shell\CopyTo-MoveTo as source\command]
 ; @="C:\\Path\\To\\Python_Interpreter C:\\Path\\To\\CopyTo-MoveTo\\src\\main.py \"s|%1\""
+
+; ;Directories:
+; [HKEY_CLASSES_ROOT\directory\shell\CopyTo-MoveTo as source]
+; "MultiSelectModel"="Player"
 
 ; [HKEY_CLASSES_ROOT\directory\shell\CopyTo-MoveTo as source\command]
 ; @="C:\\Path\\To\\Python_Interpreter C:\\Path\\To\\CopyTo-MoveTo\\src\\main.py \"s|%1\""
 
+; ;Directory background:
+; [HKEY_CLASSES_ROOT\directory\background\shell\CopyTo-MoveTo as source]
+; "MultiSelectModel"="Player"
+
 ; [HKEY_CLASSES_ROOT\directory\background\shell\CopyTo-MoveTo as source\command]
 ; @="C:\\Path\\To\\Python_Interpreter C:\\Path\\To\\CopyTo-MoveTo\\src\\main.py \"s|%v\""
 
+;     ;Destinations
+;     ;------------
+
+; ;Directories:
+; [HKEY_CLASSES_ROOT\directory\shell\CopyTo-MoveTo as destination]
+; "MultiSelectModel"="Player"
+
 ; [HKEY_CLASSES_ROOT\directory\shell\CopyTo-MoveTo as destination\command]
 ; @="C:\\Path\\To\\Python_Interpreter C:\\Path\\To\\CopyTo-MoveTo\\src\\main.py \"d|%1\""
+
+; ;Directory background:
+; [HKEY_CLASSES_ROOT\directory\background\shell\CopyTo-MoveTo as destination]
+; "MultiSelectModel"="Player"
 
 ; [HKEY_CLASSES_ROOT\directory\background\shell\CopyTo-MoveTo as destination\command]
 ; @="C:\\Path\\To\\Python_Interpreter C:\\Path\\To\\CopyTo-MoveTo\\src\\main.py \"d|%v\""
