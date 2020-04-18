@@ -36,9 +36,6 @@ Show system & hidden files in directory listings.
 - Include Files in Tree:
 Include files alongside directories, with a unique icon.
 
-- Treeview Horizontal Scroll:
-Enables a bandaid for some broken Tkinter code. Horizontal scrolling is broken for ttk treeview. This setting forces an arbitrary horizontal scroll, regardless of the tree width. Feel free to poke around in the source code if you feel adventurous.
-
 - Ask Overwrite:
 Prompts the user for further action if the program encounters existing files/directories during operation. (Mutually exclusive with Rename Duplicates)
 

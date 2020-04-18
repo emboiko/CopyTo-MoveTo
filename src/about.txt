@@ -9,5 +9,5 @@ The program's default behavior will bulldoze over any existing data without aski
 For bugs, errors, or unexpected program behavior (include your error message) contact:
 	
 	Edward Boiko
-	Emboiko@gmail.com
+	Ed@emboiko.com
 	https://github.com/emboiko

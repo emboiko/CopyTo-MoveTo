@@ -45,7 +45,6 @@ class CopyToMoveTo:
         #Settings:
         self.settings_show_hidden=BooleanVar()
         self.settings_include_files=BooleanVar(value=True)
-        self.settings_tree_xscroll=BooleanVar()
         self.settings_ask_overwrite=BooleanVar()
         self.settings_ask_overwrite.trace("w", self.settings_exclusives)
         self.settings_rename_dupes=BooleanVar(value=True)
@@ -64,7 +63,6 @@ class CopyToMoveTo:
             self.settings_geometry = self.settings["geometry"]
             self.settings_show_hidden.set(self.settings["show_hidden"])
             self.settings_include_files.set(self.settings["include_files"])
-            self.settings_tree_xscroll.set(self.settings["tree_xscroll"])
             self.settings_ask_overwrite.set(self.settings["ask_overwrite"])
             self.settings_rename_dupes.set(self.settings["rename_dupes"])
             self.settings_show_skipped.set(self.settings["show_skipped"])
@@ -77,6 +75,7 @@ class CopyToMoveTo:
         self.about_showing=BooleanVar()
 
         self.master.protocol("WM_DELETE_WINDOW", self.master_close)
+        self.master.bind("<Control-w>", self.master_close)
 
         #Geometry:
         self.master.minsize(width=400, height=200)
@@ -136,13 +135,6 @@ class CopyToMoveTo:
         self.settings_menu.add_checkbutton(
             label="Include Files in Tree",
             variable=self.settings_include_files,
-            onvalue=True,
-            offvalue=False
-        )
-
-        self.settings_menu.add_checkbutton(
-            label="Treeview Horizontal Scroll",
-            variable=self.settings_tree_xscroll,
             onvalue=True,
             offvalue=False
         )
@@ -348,7 +340,7 @@ class CopyToMoveTo:
                 self.settings_select_dirs.set(1)
 
 
-    def master_close(self):
+    def master_close(self, event=None):
         """
             Similar to utils.toplevel_close().
             writes settings to the disk as json.
@@ -358,7 +350,6 @@ class CopyToMoveTo:
             "geometry" : self.master.geometry(),
             "show_hidden" : self.settings_show_hidden.get(),
             "include_files" : self.settings_include_files.get(),
-            "tree_xscroll" : self.settings_tree_xscroll.get(),
             "ask_overwrite" : self.settings_ask_overwrite.get(),
             "rename_dupes" : self.settings_rename_dupes.get(),
             "show_skipped" : self.settings_show_skipped.get(),
@@ -737,11 +728,11 @@ class CopyToMoveTo:
                 title="Add Items",
                 show_hidden=self.settings_show_hidden.get(),
                 include_files=self.settings_include_files.get(),
-                tree_xscroll=self.settings_tree_xscroll.get(),
                 multiselect=self.settings_multiselect.get(),
                 select_dirs=self.settings_select_dirs.get(),
                 select_files=self.settings_select_files.get(),
-                unix_delimiter=False,    
+                unix_delimiter=False,
+                stdout=False
             )
 
             for result in self.ufd():
