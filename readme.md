@@ -18,5 +18,11 @@ Edit + merge `regkeys.reg` with a proper path/to/CopyTo-MoveTo.exe and add it to
 
    <img src="https://i.imgur.com/wLcGVgL.png">
 
-**Now featuring IPC:** CopyTo-MoveTo should only allow one copy of itself to exist at a time. Additional instances will pass their first (and only their first*) positional argument to the main process, where they flow into the GUI
+**Now featuring IPC:** CopyTo-MoveTo should only allow one copy of itself to exist at a time. Additional instances will pass their arguments to the main process, where they flow into the GUI
 
+---
+
+Todo:
+- Local logs
+- Update/Installer + regkeys automation
+- Prettier message-boxes
