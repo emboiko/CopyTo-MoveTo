@@ -27,6 +27,10 @@ Open Destination(s):
 - Show the file-dialog, insert into destination list (bottom)
 - <Ctrl+K+O>
 
+Exit:
+- Quit the application
+- <Ctrl-W>
+
 Settings:
 ---------
 

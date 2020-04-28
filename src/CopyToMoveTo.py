@@ -17,7 +17,7 @@ from json import dumps, loads
 from functools import wraps
 from threading import Thread
 
-from Ufd.src.Ufd import Ufd
+from Ufd.Ufd import Ufd
 
 
 class CopyToMoveTo:
@@ -49,7 +49,6 @@ class CopyToMoveTo:
         self.settings_ask_overwrite.trace("w", self.settings_exclusives)
         self.settings_rename_dupes=BooleanVar(value=True)
         self.settings_rename_dupes.trace("w", self.settings_exclusives)
-        self.settings_show_skipped=BooleanVar()
         self.settings_multiselect=BooleanVar(value=True)
         self.settings_select_dirs=BooleanVar(value=True)
         self.settings_select_dirs.trace("w", self.settings_mutuals)
@@ -65,7 +64,6 @@ class CopyToMoveTo:
             self.settings_include_files.set(self.settings["include_files"])
             self.settings_ask_overwrite.set(self.settings["ask_overwrite"])
             self.settings_rename_dupes.set(self.settings["rename_dupes"])
-            self.settings_show_skipped.set(self.settings["show_skipped"])
             self.settings_multiselect.set(self.settings["multiselect"])
             self.settings_select_dirs.set(self.settings["select_dirs"])
             self.settings_select_files.set(self.settings["select_files"])
@@ -151,13 +149,6 @@ class CopyToMoveTo:
         self.settings_menu.add_checkbutton(
             label="Rename Duplicates",
             variable=self.settings_rename_dupes,
-            onvalue=True,
-            offvalue=False
-        )
-
-        self.settings_menu.add_checkbutton(
-            label="Skipped Items Messagebox",
-            variable=self.settings_show_skipped,
             onvalue=True,
             offvalue=False
         )
@@ -352,7 +343,6 @@ class CopyToMoveTo:
             "include_files" : self.settings_include_files.get(),
             "ask_overwrite" : self.settings_ask_overwrite.get(),
             "rename_dupes" : self.settings_rename_dupes.get(),
-            "show_skipped" : self.settings_show_skipped.get(),
             "multiselect" : self.settings_multiselect.get(),
             "select_dirs" : self.settings_select_dirs.get(),
             "select_files" : self.settings_select_files.get(),
@@ -493,7 +483,6 @@ class CopyToMoveTo:
         sources = self.list_box_source.get(0,"end")
         destinations =  self.list_box_dest.get(0,"end")
 
-        self.skipped_ok = []
         self.skipped_err = []
 
         for j, destination in enumerate(destinations):
@@ -522,9 +511,6 @@ class CopyToMoveTo:
                                 continue
 
                         else:
-                            self.skipped_ok.append(
-                                f"Cancelled:\n{source} => {future_destination}"
-                            )
                             continue
 
                     if self.settings_rename_dupes.get():
@@ -539,13 +525,6 @@ class CopyToMoveTo:
 
         self.list_box_source.delete(0, "end")
         self.list_box_dest.delete(0, "end")
-
-        if self.settings_show_skipped.get():
-            if self.skipped_ok:    
-                messagebox.showinfo(
-                    title="Skipped",
-                    message="\n\n".join(self.skipped_ok)
-                )
 
         if self.skipped_err:
                 messagebox.showerror(

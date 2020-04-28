@@ -1,6 +1,6 @@
 from tkinter import Tk
 from CopyToMoveTo import CopyToMoveTo
-from Socket_Singleton.Socket_Singleton import Socket_Singleton
+from Socket_Singleton import Socket_Singleton
 
 
 class Ct_Mt:

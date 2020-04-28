@@ -25,4 +25,3 @@ Edit + merge `regkeys.reg` with a proper path/to/CopyTo-MoveTo.exe and add it to
 Todo:
 - Local logs
 - Update/Installer + regkeys automation
-- Prettier message-boxes

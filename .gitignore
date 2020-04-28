@@ -2,7 +2,6 @@
 __pycache__
 build
 __build__
-__build__.txt
 settings.json
 testkeys.reg
 CopyTo-MoveTo.spec
