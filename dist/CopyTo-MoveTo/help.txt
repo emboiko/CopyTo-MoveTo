@@ -46,9 +46,6 @@ Prompts the user for further action if the program encounters existing files/dir
 - Rename Duplicates:
 Renames the file until a given path conflic is resolved, by appending an index to the filename. (Mutually exclusive with Ask Overwrite)
 
-- Skipped Items Messagebox:
-Enable / Disable a prompt that displays items skipped during operations via Ask Overwrite
-
 - Multiselect:
 Enable / Disable multiselect in the dialog's list-selection area. 
 
