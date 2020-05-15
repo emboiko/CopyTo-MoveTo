@@ -1,7 +1,7 @@
 .vscode
 __pycache__
 build
-__build__
+build.bat
 settings.json
 testkeys.reg
 CopyTo-MoveTo.spec

@@ -76,7 +76,7 @@ class CopyToMoveTo:
         self.master.bind("<Control-w>", self.master_close)
 
         #Geometry:
-        self.master.minsize(width=400, height=200)
+        self.master.minsize(width=450, height=200)
 
         if self.settings_geometry:
             self.master.geometry(self.settings_geometry)
@@ -180,17 +180,22 @@ class CopyToMoveTo:
 
         #Menu commands:
         self.main_menu.add_command(
+            label="Swap Selected",
+            command=self.swap_selected
+        )
+        self.master.bind("<Control-s>", lambda event: self.swap_selected())
+        
+        self.main_menu.add_command(
             label="Clear Selected",
-            accelerator="Ctrl+P",
             command=self.clear_selected
         )
-        self.master.bind("<Control-p>", lambda event: self.clear_selected())
+        self.master.bind("<Control-x>", lambda event: self.clear_selected())
 
         self.main_menu.add_command(
             label="Clear All",
             command=self.clear_all
         )
-        self.master.bind("<Control-l>", lambda event: self.clear_all())
+        self.master.bind("<Control-Shift-X>", lambda event: self.clear_all())
 
         self.main_menu.add_separator()
 
@@ -369,14 +374,41 @@ class CopyToMoveTo:
         dialog.destroy()
 
 
+    def swap_selected(self):
+        """Swap list entries between source & destination"""
+
+        source_selection = list(self.list_box_source.curselection())
+        dest_selection = list(self.list_box_dest.curselection())
+
+        for i in reversed(source_selection):
+            item = self.list_box_source.get(i)
+            self.list_box_source.delete(i)
+            self.list_box_dest.insert("0", item)
+
+
+        for i in reversed(dest_selection):
+            item = self.list_box_dest.get(i)
+            self.list_box_dest.delete(i)
+            self.list_box_source.insert("0", item)
+
+
     def clear_selected(self):
         """Removes selected (highlighted) item(s) from a given listbox"""
 
-        for i in reversed(list(self.list_box_source.curselection())):
-            self.list_box_source.delete(i)
-        for i in reversed(list(self.list_box_dest.curselection())):
-            self.list_box_dest.delete(i)
+        source_selection = list(self.list_box_source.curselection())
+        dest_selection = list(self.list_box_dest.curselection())
 
+        if source_selection:
+            for i in reversed(source_selection):
+                self.list_box_source.delete(i)
+
+            self.list_box_source.selection_set(source_selection[0])
+
+        if dest_selection:
+            for i in reversed(dest_selection):
+                self.list_box_dest.delete(i)
+
+            self.list_box_dest.selection_set(dest_selection[0])
 
     def clear_all(self):
         """Clears both listboxes in the main UI, resetting the form."""
