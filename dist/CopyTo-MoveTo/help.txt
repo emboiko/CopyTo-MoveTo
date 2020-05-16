@@ -59,8 +59,6 @@ Enable / Disable directory entries in the dialog's list-selection area.
 - Select Files:
 Enable / Disable file entries in the dialog's list-selection area.
 
-*** If neither "Select Folders" or "Select Files" is enabled, the file dialog will be, for the most part, useless. By default, the application will allow multiselection of files and directories. 
-
 Tips & Tricks:
 --------------
 
