@@ -311,12 +311,12 @@ class CopyToMoveTo:
             to prevent logical/runtime errors or unexpected behavior.
         """
 
-        if args[0] == "PY_VAR3":
+        if args[0] == "PY_VAR2":
             if self.settings_ask_overwrite.get() == 1:
                 self.settings_rename_dupes.set(0)
                 return 
 
-        elif args[0] == "PY_VAR4":        
+        elif args[0] == "PY_VAR3":        
             if self.settings_rename_dupes.get() == 1:
                 self.settings_ask_overwrite.set(0)
                 return 
@@ -332,10 +332,10 @@ class CopyToMoveTo:
         if self.settings_select_dirs.get() == 0 \
         and self.settings_select_files.get() == 0:
 
-            if args[0] == "PY_VAR7":
+            if args[0] == "PY_VAR5":
                 self.settings_select_files.set(1)
         
-            elif args[0] == "PY_VAR8":
+            elif args[0] == "PY_VAR6":
                 self.settings_select_dirs.set(1)
 
 
