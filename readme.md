@@ -5,48 +5,32 @@ CopyTo-MoveTo is a GUI utility for making the process of copying and moving file
 <p align="center">
     <img src="https://i.imgur.com/7oTlfM6.png">
 	<img src="https://i.imgur.com/VRKKDms.png">
-<<<<<<< HEAD
-	<img src="https://i.imgur.com/7oTlfM6.png">
-    <img src="https://i.imgur.com/wLcGVgL.png">
-=======
->>>>>>> 444eb7ee2173ca62ce47847a1ed84fa254391156
 </p>
 
 ## Basic Installation and Usage:
 
-<<<<<<< HEAD
-~~Download & extract the .zip, and run `CopyTo-MoveTo Installer.exe`~~
-
+Download & extract the .zip, and run `Install CopyTo-MoveTo.exe`
 
 **-or-**
 
-`git clone https://github.com/emboiko/CopyTo-MoveTo.git`
-
-`python CopyTo-MoveTo/src/main.py`
-
-**-or-**
-=======
-Download & extract the .zip, then install with `Install CopyTo-MoveTo.exe`
+``` 
+git clone https://github.com/emboiko/CopyTo-MoveTo.git CopyTo-MoveTo
+cd CopyTo-MoveTo/src
+python CopyTo-MoveTo/src/main.py 
+```
 
 **-or-**
-
-- `git clone https://github.com/emboiko/CopyTo-MoveTo.git`
-- `virtualenv` / `pipenv` / `venv` 
-- `pip install requirements.txt`
-- `python CopyTo-MoveTo/src/main.py`
-
-**-or-**
-
-Run `CopyTo-MoveTo.exe` from within its source directory using a shortcut, and merge the registry keys manually.
-
----
->>>>>>> 444eb7ee2173ca62ce47847a1ed84fa254391156
 
 Run `CopyTo-MoveTo.exe` from within its source directory using a shortcut, and merge the registry keys manually.
 
 <img src="https://i.imgur.com/wLcGVgL.png">
 
-Installation wizard & regkeys automation made with [Inno Setup](https://jrsoftware.org/isinfo.php)
+- **Now featuring IPC:** CopyTo-MoveTo should only allow one copy of itself to exist at a time. Additional instances will pass their arguments to the main process, where they flow into the GUI
+
+- A `settings.json` will be created in %APPDATA/CopyTo-MoveTo when the program exits for the first time. 
+
+- Installation wizard & regkeys automation made with [Inno Setup](https://jrsoftware.org/isinfo.php)
+
 
 Shortcuts:
 ----------
@@ -86,7 +70,7 @@ Exit:
 - <Ctrl+W>
 
 Settings:
----------
+---
 
 - Show Hidden Files and Folders:
 Show system & hidden files in directory listings.
@@ -110,7 +94,7 @@ Enable / Disable directory entries in the dialog's list-selection area.
 Enable / Disable file entries in the dialog's list-selection area.
 
 Tips & Tricks:
---------------
+---
 
 - One instance of the application is allowed to run at a time.
 
@@ -124,12 +108,4 @@ Tips & Tricks:
 
 - Drag + drop files/directories to CopyTo-MoveTo.exe's shortcut to run the application with those paths as arguments. Currently hardcoded to populate to origin listbox.
 
-<<<<<<< HEAD
-- **Now featuring IPC:** CopyTo-MoveTo should only allow one copy of itself to exist at a time. Additional instances will pass their arguments to the main process, where they flow into the GUI
 
-- A `settings.json` will be created in %APPDATA/CopyTo-MoveTo when the program exits for the first time. 
-
-- Installation wizard & regkeys automation made with [Inno Setup](https://jrsoftware.org/isinfo.php)
-=======
-- The listboxes in the main window can be populated multiple times, and are only cleared upon a Copy/Move operation, or if the user deliberately clears them using the menu operations.
->>>>>>> 444eb7ee2173ca62ce47847a1ed84fa254391156
