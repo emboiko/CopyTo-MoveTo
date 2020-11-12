@@ -11,7 +11,7 @@ from tkinter import(
 )
 from shutil import copy2, move, rmtree, copytree
 from os.path import dirname, join, split, splitext, exists, isfile, isdir
-from os import sep, remove
+from os import mkdir, sep, remove, getenv
 from platform import system
 from json import dumps, loads
 from functools import wraps
@@ -56,6 +56,8 @@ class CopyToMoveTo:
         self.settings_select_files.trace("w", self.settings_mutuals)
         self.settings_geometry = None
 
+        self.appdata_dir = getenv("APPDATA") + "/CopyTo-MoveTo"
+        self.appdata_path = self.appdata_dir + "/settings.json"
         self.settings=self.init_settings()
 
         if self.settings:
@@ -292,8 +294,9 @@ class CopyToMoveTo:
     def init_settings(self):
         """Called on startup, loads, parses, and returns json settings."""
 
-        if exists(f"{dirname(__file__)}/settings.json"):
-            with open(f"{dirname(__file__)}/settings.json", "r") as settings_file:
+
+        if exists(self.appdata_path):
+            with open(self.appdata_path, "r") as settings_file:
                 settings_json=settings_file.read()
 
             settings=loads(settings_json)
@@ -355,7 +358,10 @@ class CopyToMoveTo:
 
         settings_json=dumps(settings)
 
-        with open(f"{dirname(__file__)}/settings.json", "w") as settings_file:
+        if not exists(self.appdata_dir):
+            mkdir(self.appdata_dir)
+
+        with open(self.appdata_path, "w+") as settings_file:
             settings_file.write(settings_json)
 
         if self.dialog_showing.get() == 1:

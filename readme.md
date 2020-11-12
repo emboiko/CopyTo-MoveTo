@@ -9,7 +9,6 @@
 
 ~~Download & extract the .zip, and run `CopyTo-MoveTo Installer.exe`~~
 
-(Installer is still in development)
 
 **-or-**
 
@@ -23,7 +22,8 @@ Run `CopyTo-MoveTo.exe` from within its source directory using a shortcut, and m
 
 ---
 
-**Now featuring IPC:** CopyTo-MoveTo should only allow one copy of itself to exist at a time. Additional instances will pass their arguments to the main process, where they flow into the GUI
+- **Now featuring IPC:** CopyTo-MoveTo should only allow one copy of itself to exist at a time. Additional instances will pass their arguments to the main process, where they flow into the GUI
 
-Installation wizard & regkeys automation made with [Inno Setup](https://jrsoftware.org/isinfo.php)
-(Not working all the way yet)
+- A `settings.json` will be created in %APPDATA/CopyTo-MoveTo when the program exits for the first time. 
+
+- Installation wizard & regkeys automation made with [Inno Setup](https://jrsoftware.org/isinfo.php)
